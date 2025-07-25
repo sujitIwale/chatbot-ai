@@ -1,0 +1,23 @@
+{
+  "name": "agentic-chat",
+  "version": "1.0.0",
+  "description": "repository for agentic chat",
+  "main": "index.js",
+  "scripts": {
+    "dev": "pnpm --parallel run dev",
+    "build": "pnpm --recursive run build",
+    "type-check": "pnpm --recursive run type-check",
+    "lint": "pnpm --recursive run lint",
+    "clean": "pnpm --recursive run clean",
+    "frontend": "pnpm --filter frontend",
+    "backend": "pnpm --filter backend"
+  },
+  "keywords": [],
+  "author": "Sujit Iwale",
+  "license": "ISC",
+  "packageManager": "pnpm@10.10.0",
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=8.0.0"
+  }
+}
