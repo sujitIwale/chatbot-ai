@@ -18,7 +18,7 @@ const AuthSuccess: React.FC = () => {
         setStatus("success");
 
         setTimeout(() => {
-          navigate("/", { replace: true });
+          navigate("/dashboard", { replace: true });
         }, 2000);
       } catch (error) {
         console.error("Error handling auth callback:", error);
