@@ -9,6 +9,7 @@ import authRouter from './routes/auth';
 import userRouter from './routes/user';
 import { authenticateJWT } from './middleware/auth';
 import chatbotRouter from './routes/chatbot';
+import agentToolRouter from './routes/agent-tool';
 
 dotenv.config();
 
@@ -44,6 +45,7 @@ app.get('/', (req: Request, res: Response) => {
 app.use('/auth', authRouter);
 app.use('/api/user', authenticateJWT, userRouter);
 app.use('/api/chatbot', authenticateJWT, chatbotRouter);
+app.use('/api/agent-tool', agentToolRouter);
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);

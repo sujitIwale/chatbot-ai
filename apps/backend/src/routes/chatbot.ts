@@ -17,7 +17,7 @@ chatbotRouter.get("/:id/users", authorization, getCustomerSupportUsers);
 
 
 // tickets
-chatbotRouter.post("/:id/tickets", createTicket);
+chatbotRouter.post("/:id/ticket/create",authorization, createTicket);
 chatbotRouter.get("/:id/tickets", authorization, getTickets);
 
 
