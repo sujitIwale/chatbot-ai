@@ -54,3 +54,75 @@ export const createChatbot = async (req: Request, res: Response) => {
     res.status(500).json({ error: "Failed to create chatbot" });
   }
 };
+
+export const deployChatbot = async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  try {
+    const chatbot = await prisma.chatbot.findUnique({
+      where: {
+        id,
+        ownerId: req.user?.id,
+      },
+    });
+
+    if (!chatbot) {
+      return res.status(404).json({ error: "Chatbot not found" });
+    }
+
+    // TODO: Implement actual deployment logic
+    res.json({ message: "Chatbot deployed successfully" });
+  } catch (error) {
+    res.status(500).json({ error: "Failed to deploy chatbot" });
+  }
+};
+
+export const createCustomerSupportUser = async (req: Request, res: Response) => {
+  const { name, email, chatbotId } = req.body;
+
+  try {
+    const customerSupportUser = await prisma.customerSupportUser.create({
+      data: {
+        name,
+        email,
+        chatbotId
+      }
+    });
+
+    res.status(201).json(customerSupportUser);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to create customer support user" });
+  }
+};
+
+export const getCustomerSupportUsers = async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  try {
+    const customerSupportUsers = await prisma.customerSupportUser.findMany({
+      where: { chatbotId: id },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        _count: {
+          select: {
+            assignedTickets: true
+          }
+        }
+      }
+    });
+
+    // Transform the response to include ticketCount at the top level
+    const usersWithTicketCount = customerSupportUsers.map(user => ({
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      ticketCount: user._count.assignedTickets
+    }));
+
+    res.status(200).json(usersWithTicketCount);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to get customer support users" });
+  }
+};

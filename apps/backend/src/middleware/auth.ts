@@ -42,3 +42,18 @@ export const authenticateJWT = async (req: Request, res: Response, next: NextFun
     return;
   }
 };
+
+export const authorization = async (req: Request, res: Response, next: NextFunction) => {
+  const { id } = req.params;
+
+  const chatbot = await prisma.chatbot.findUnique({
+    where: { id, ownerId: req.user?.id },
+  });
+
+  if (!chatbot) {
+    res.status(403).json({ message: 'Not authorized to access this chatbot' });
+    return;
+  }
+
+  next();
+}

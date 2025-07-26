@@ -1,9 +1,21 @@
 import { Router } from "express";
-import { createChatbot, getChatbot } from "../controllers/chatbot";
+import { createChatbot, getChatbot, deployChatbot, createCustomerSupportUser, getCustomerSupportUsers } from "../controllers/chatbot";
+import { authorization } from "../middleware/auth";
+import { createTicket, getTickets } from "../controllers/tickets";
 
 const chatbotRouter: Router = Router();
 
-chatbotRouter.get("/:id", getChatbot);
 chatbotRouter.post("/create", createChatbot);
+chatbotRouter.get("/:id", authorization, getChatbot);
+chatbotRouter.post("/:id/deploy", authorization, deployChatbot);
+
+chatbotRouter.post("/:id/create-user", authorization, createCustomerSupportUser);
+chatbotRouter.get("/:id/users", authorization, getCustomerSupportUsers);
+
+
+// tickets
+chatbotRouter.post("/:id/tickets", createTicket);
+chatbotRouter.get("/:id/tickets", authorization, getTickets);
+
 
 export default chatbotRouter;
