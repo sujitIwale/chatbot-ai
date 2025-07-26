@@ -64,19 +64,20 @@ export const createChatbot = async (req: Request, res: Response) => {
       },
     });
     try {
-      const { agentId } = await lyzrManagerAgent.initialize({
+      const { agentId, ragId } = await lyzrManagerAgent.initialize({
         id: chatbot.id,
         name: chatbot.name,
         description: chatbot.description || undefined,
         instructions: chatbot.instructions,
-        context: chatbot.context || undefined
+        context: chatbot.context
       });
 
-      console.log({agentId})
+      console.log({agentId, ragId})
       const updatedChatbot = await prisma.chatbot.update({
         where: { id: chatbot.id },
         data: {
           lyzrAgentId: agentId,
+          lyzrRagId: ragId,
           deployed: true,
           deployedAt: new Date()
         }
@@ -126,7 +127,7 @@ export const deployChatbot = async (req: Request, res: Response) => {
 
     // Initialize or update Lyzr agent
     try {
-      const { agentId } = await lyzrManagerAgent.initialize({
+      const { agentId, ragId } = await lyzrManagerAgent.initialize({
         id: chatbot.id,
         name: chatbot.name,
         description: chatbot.description || undefined,
@@ -138,7 +139,8 @@ export const deployChatbot = async (req: Request, res: Response) => {
       await prisma.chatbot.update({
         where: { id: chatbotId },
         data: {
-          lyzrAgentId: agentId
+          lyzrAgentId: agentId,
+          lyzrRagId: ragId
         }
       });
 
