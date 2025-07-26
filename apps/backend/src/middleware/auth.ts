@@ -42,36 +42,3 @@ export const authenticateJWT = async (req: Request, res: Response, next: NextFun
     return;
   }
 };
-
-// Optional auth middleware - will attach user to req if token is valid, but will not block request if no token
-export const optionalAuth = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const authHeader = req.headers.authorization;
-    
-    if (!authHeader) {
-      return next();
-    }
-
-    const token = authHeader.split(' ')[1]; // Bearer TOKEN format
-    
-    if (!token) {
-      return next();
-    }
-
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret') as { id: string };
-    
-    // Get the user from the database
-    const user = await prisma.user.findUnique({
-      where: { id: decoded.id },
-    });
-
-    if (user) {
-      req.user = user;
-    }
-    
-    next();
-  } catch (error) {
-    // Just continue if there's an error with the token
-    next();
-  }
-};

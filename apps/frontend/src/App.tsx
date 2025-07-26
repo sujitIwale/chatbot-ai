@@ -5,6 +5,7 @@ import AuthSuccess from "./pages/AuthSuccess";
 import AuthProvider from "./lib/contexts/auth/AuthProvider";
 import CreateChatBot from "./pages/CreateChatBot/CreateChatBot";
 import ChatBots from "./pages/ChatBots/ChatBots";
+import ChatBot from "./pages/ChatBot/ChatBot";
 import PrivateRoute from "./components/routes/PrivateRoute";
 import GuestRoute from "./components/routes/GuestRoute";
 import AppLayout from "./components/layout/AppLayout";
@@ -24,6 +25,7 @@ function App() {
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/chatbots" element={<ChatBots />} />
             <Route path="/create" element={<CreateChatBot />} />
+            <Route path="/chatbot/:id" element={<ChatBot />} />
           </Route>
         </Route>
       </Routes>

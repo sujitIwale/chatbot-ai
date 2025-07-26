@@ -8,7 +8,7 @@ import passport from './config/passport';
 import authRouter from './routes/auth';
 import userRouter from './routes/user';
 import { authenticateJWT } from './middleware/auth';
-import './types';
+import chatbotRouter from './routes/chatbot';
 
 dotenv.config();
 
@@ -43,6 +43,7 @@ app.get('/', (req: Request, res: Response) => {
 // Routes
 app.use('/auth', authRouter);
 app.use('/api/user', authenticateJWT, userRouter);
+app.use('/api/chatbot', authenticateJWT, chatbotRouter);
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);

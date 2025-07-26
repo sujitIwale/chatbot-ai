@@ -18,4 +18,50 @@ model User {
   profilePicture String?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
+
+  // Relations
+  chatbots Chatbot[]
+}
+
+model Chatbot {
+  id           String   @id @default(uuid())
+  name         String
+  description  String?
+  instructions String
+  context      String?
+  ownerId      String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  owner                User                  @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  customerSupportUsers CustomerSupportUser[]
+  tickets              Ticket[]
+}
+
+model CustomerSupportUser {
+  id        String   @id @default(uuid())
+  name      String
+  email     String
+  chatbotId String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  chatbot         Chatbot  @relation(fields: [chatbotId], references: [id], onDelete: Cascade)
+  assignedTickets Ticket[]
+
+  @@unique([email, chatbotId])
+}
+
+model Ticket {
+  id         String   @id @default(uuid())
+  subject    String
+  sessionId  String
+  status     String   @default("open")
+  chatbotId  String
+  assignedTo String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  chatbot      Chatbot              @relation(fields: [chatbotId], references: [id], onDelete: Cascade)
+  assignedUser CustomerSupportUser? @relation(fields: [assignedTo], references: [id], onDelete: SetNull)
 }
