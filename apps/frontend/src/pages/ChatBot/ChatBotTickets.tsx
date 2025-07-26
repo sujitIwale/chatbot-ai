@@ -80,7 +80,7 @@ const ChatBotTickets = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <ChatbotNavigation chatbotId={chatbot.id} chatbotName={chatbot.name} />
-      <TicketsPanel />
+      <TicketsPanel chatbotId={chatbot.id} />
     </div>
   );
 };

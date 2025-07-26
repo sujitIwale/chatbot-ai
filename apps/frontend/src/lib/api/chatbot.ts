@@ -34,4 +34,16 @@ export const chatbotApi = {
     });
     return response.data;
   },
+  getTickets: async (chatbotId: string) => {
+    const response = await client.get(`/api/chatbot/${chatbotId}/tickets`);
+    return response.data;
+  },
+  createTicket: async (chatbotId: string, data: {
+    subject: string;
+    sessionId: string;
+    assignedTo?: string;
+  }) => {
+    const response = await client.post(`/api/chatbot/${chatbotId}/ticket/create`, data);
+    return response.data;
+  },
 };

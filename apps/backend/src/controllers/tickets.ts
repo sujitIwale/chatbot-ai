@@ -23,6 +23,15 @@ export const getTickets = async (req: Request, res: Response) => {
   try {
     const tickets = await prisma.ticket.findMany({
       where: { chatbotId },
+      include: {
+        assignedUser: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+      },
     });
 
     res.status(200).json(tickets);
