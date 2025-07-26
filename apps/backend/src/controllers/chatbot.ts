@@ -1,6 +1,19 @@
 import { Request, Response } from "express";
 import prisma from "../lib/db";
 
+export const getChatbots = async (req: Request, res: Response) => {
+
+  try {
+    const chatbots = await prisma.chatbot.findMany({
+      where: { ownerId: req.user?.id },
+    });
+
+    res.status(200).json(chatbots);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to get chatbots" });
+  }
+};
+
 export const getChatbot = async (req: Request, res: Response) => {
   const { id } = req.params;
 
@@ -126,3 +139,4 @@ export const getCustomerSupportUsers = async (req: Request, res: Response) => {
     res.status(500).json({ error: "Failed to get customer support users" });
   }
 };
+

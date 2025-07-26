@@ -4,7 +4,6 @@ import Login from "./pages/Login";
 import AuthSuccess from "./pages/AuthSuccess";
 import AuthProvider from "./lib/contexts/auth/AuthProvider";
 import CreateChatBot from "./pages/CreateChatBot/CreateChatBot";
-import ChatBots from "./pages/ChatBots/ChatBots";
 import ChatBot from "./pages/ChatBot/ChatBot";
 import ChatBotTickets from "./pages/ChatBot/ChatBotTickets";
 import ChatBotSupport from "./pages/ChatBot/ChatBotSupport";
@@ -26,7 +25,6 @@ function App() {
         <Route element={<PrivateRoute />}>
           <Route element={<AppLayout />}>
             <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/chatbots" element={<ChatBots />} />
             <Route path="/create" element={<CreateChatBot />} />
             <Route path="/chatbot/:id" element={<ChatBot />} />
             <Route path="/chatbot/:id/tickets" element={<ChatBotTickets />} />

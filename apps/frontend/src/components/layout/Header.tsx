@@ -10,11 +10,6 @@ const navigationItems = [
     href: "/dashboard",
     icon: LayoutDashboard,
   },
-  {
-    name: "Your Chat Bots",
-    href: "/chatbots",
-    icon: Bot,
-  },
 ];
 
 const Header = () => {
