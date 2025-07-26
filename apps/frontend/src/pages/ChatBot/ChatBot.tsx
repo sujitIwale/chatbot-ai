@@ -46,7 +46,7 @@ const ChatBot = () => {
     if (id) {
       fetchChatbot();
     } else {
-      navigate("/chatbots");
+      navigate("/dashboard");
     }
   }, [id, navigate]);
 
@@ -96,8 +96,8 @@ const ChatBot = () => {
           <h2 className="text-xl font-semibold text-gray-900 mb-2">
             {error || "Chatbot not found"}
           </h2>
-          <Button onClick={() => navigate("/chatbots")} variant="outline">
-            Back to Chatbots
+          <Button onClick={() => navigate("/dashboard")} variant="outline">
+            Back to Dashboard
           </Button>
         </div>
       </div>

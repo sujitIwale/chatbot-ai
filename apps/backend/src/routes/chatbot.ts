@@ -9,16 +9,16 @@ chatbotRouter.get("/", getChatbots);
 chatbotRouter.post("/create", createChatbot);
 
 // chatbot
-chatbotRouter.get("/:id", authorization, getChatbot);
-chatbotRouter.post("/:id/deploy", authorization, deployChatbot);
+chatbotRouter.get("/:chatbotId", authorization, getChatbot);
+chatbotRouter.post("/:chatbotId/deploy", authorization, deployChatbot);
 
-chatbotRouter.post("/:id/create-user", authorization, createCustomerSupportUser);
-chatbotRouter.get("/:id/users", authorization, getCustomerSupportUsers);
+chatbotRouter.post("/:chatbotId/create-user", authorization, createCustomerSupportUser);
+chatbotRouter.get("/:chatbotId/users", authorization, getCustomerSupportUsers);
 
 
 // tickets
-chatbotRouter.post("/:id/ticket/create",authorization, createTicket);
-chatbotRouter.get("/:id/tickets", authorization, getTickets);
+chatbotRouter.post("/:chatbotId/ticket/create",authorization, createTicket);
+chatbotRouter.get("/:chatbotId/tickets", authorization, getTickets);
 
 
 export default chatbotRouter;

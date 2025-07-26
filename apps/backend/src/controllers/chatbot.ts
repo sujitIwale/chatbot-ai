@@ -15,12 +15,12 @@ export const getChatbots = async (req: Request, res: Response) => {
 };
 
 export const getChatbot = async (req: Request, res: Response) => {
-  const { id } = req.params;
+  const { chatbotId } = req.params;
 
   try {
     const chatbot = await prisma.chatbot.findUnique({
       where: {
-        id,
+        id: chatbotId,
         ownerId: req.user?.id,
       },
       include: {
@@ -69,12 +69,12 @@ export const createChatbot = async (req: Request, res: Response) => {
 };
 
 export const deployChatbot = async (req: Request, res: Response) => {
-  const { id } = req.params;
+  const { chatbotId } = req.params;
 
   try {
     const chatbot = await prisma.chatbot.findUnique({
       where: {
-        id,
+        id: chatbotId,
         ownerId: req.user?.id,
       },
     });
@@ -91,7 +91,8 @@ export const deployChatbot = async (req: Request, res: Response) => {
 };
 
 export const createCustomerSupportUser = async (req: Request, res: Response) => {
-  const { name, email, chatbotId } = req.body;
+  const { name, email } = req.body;
+  const { chatbotId } = req.params;
 
   try {
     const customerSupportUser = await prisma.customerSupportUser.create({
@@ -109,11 +110,11 @@ export const createCustomerSupportUser = async (req: Request, res: Response) => 
 };
 
 export const getCustomerSupportUsers = async (req: Request, res: Response) => {
-  const { id } = req.params;
+  const { chatbotId } = req.params;
 
   try {
     const customerSupportUsers = await prisma.customerSupportUser.findMany({
-      where: { chatbotId: id },
+      where: { chatbotId },
       select: {
         id: true,
         name: true,

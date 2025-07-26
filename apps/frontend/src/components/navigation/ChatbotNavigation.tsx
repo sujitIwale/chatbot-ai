@@ -82,11 +82,11 @@ const ChatbotNavigation: React.FC<ChatbotNavigationProps> = ({
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => navigate("/chatbots")}
+              onClick={() => navigate("/dashboard")}
               className="text-gray-600 hover:text-gray-900"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Chatbots
+              Back to Dashboard
             </Button>
             <div className="hidden sm:flex items-center space-x-3">
               <div className="p-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg">

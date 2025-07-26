@@ -56,7 +56,6 @@ model Ticket {
   id         String   @id @default(uuid())
   subject    String
   sessionId  String
-  status     String   @default("open")
   chatbotId  String
   assignedTo String?
   createdAt  DateTime @default(now())

@@ -2,25 +2,27 @@ import { Request, Response } from "express";
 import prisma from "../lib/db";
 
 export const createTicket = async (req: Request, res: Response) => {
-  const { subject, status, assignedTo ,sessionId, chatbotId} = req.body;
+  const { subject,  assignedTo ,sessionId} = req.body;
+  const { chatbotId } = req.params;
 
   try {
     const ticket = await prisma.ticket.create({
-      data: { subject, status, assignedTo, sessionId, chatbotId },
+      data: { subject, assignedTo, sessionId, chatbotId },
     });
 
     res.status(201).json(ticket);
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: "Failed to create ticket" });
   }
 };
 
 export const getTickets = async (req: Request, res: Response) => {
-  const { id } = req.params;
+  const { chatbotId } = req.params;
 
   try {
     const tickets = await prisma.ticket.findMany({
-      where: { chatbotId: id },
+      where: { chatbotId },
     });
 
     res.status(200).json(tickets);
