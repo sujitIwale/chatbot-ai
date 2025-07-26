@@ -12,7 +12,7 @@ export const getToken = () => {
     return localStorage.getItem("token");
 };
 
-export const logout = () => {
+export const tryLogout = () => {
     localStorage.removeItem("token");
     window.location.href = '/login';
 };

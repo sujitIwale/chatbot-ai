@@ -10,8 +10,8 @@ import {
   User,
   MessageSquare,
   Copy,
-  ExternalLink,
   Settings,
+  CheckCircle,
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import ChatbotNavigation from "../../components/navigation/ChatbotNavigation";
@@ -23,6 +23,8 @@ interface IChatBot {
   description?: string;
   instructions: string;
   context?: string;
+  deployed: boolean;
+  deployedAt?: string;
   createdAt: string;
   updatedAt: string;
   owner: {
@@ -39,7 +41,7 @@ const ChatBot = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [deployStatus, setDeployStatus] = useState<
-    "idle" | "deploying" | "deployed"
+    "idle" | "deploying" | "deployed" | "error"
   >("idle");
 
   useEffect(() => {
@@ -65,12 +67,28 @@ const ChatBot = () => {
   };
 
   const handleDeploy = async () => {
-    setDeployStatus("deploying");
-    // Simulate deployment process
-    setTimeout(() => {
+    if (!chatbot || chatbot.deployed) return;
+
+    try {
+      setDeployStatus("deploying");
+      await chatbotApi.deployChatbot(chatbot.id, {
+        name: chatbot.name,
+        description: chatbot.description,
+        instructions: chatbot.instructions,
+        context: chatbot.context,
+      });
+
+      // Refresh chatbot data to get updated deployment status
+      await fetchChatbot();
       setDeployStatus("deployed");
+
+      // Reset status after showing success message
       setTimeout(() => setDeployStatus("idle"), 3000);
-    }, 2000);
+    } catch (err) {
+      console.error("Error deploying chatbot:", err);
+      setDeployStatus("error");
+      setTimeout(() => setDeployStatus("idle"), 3000);
+    }
   };
 
   const copyToClipboard = (text: string) => {
@@ -104,6 +122,11 @@ const ChatBot = () => {
     );
   }
 
+  const isDeployed = chatbot.deployed;
+  const lastUpdated = chatbot.deployedAt
+    ? new Date(chatbot.deployedAt)
+    : new Date(chatbot.updatedAt);
+
   return (
     <div className="min-h-screen bg-gray-50">
       <ChatbotNavigation chatbotId={chatbot.id} chatbotName={chatbot.name} />
@@ -123,15 +146,32 @@ const ChatBot = () => {
                     <h1 className="text-2xl font-bold text-gray-900">
                       {chatbot.name}
                     </h1>
-                    <p className="text-sm text-gray-500">
-                      AI Assistant • Active
-                    </p>
+                    <div className="flex items-center space-x-2">
+                      <p className="text-sm text-gray-500">AI Assistant</p>
+                      <span className="text-gray-400">•</span>
+                      {isDeployed ? (
+                        <div className="flex items-center">
+                          <CheckCircle className="w-4 h-4 text-green-500 mr-1" />
+                          <span className="text-sm text-green-600 font-medium">
+                            Deployed
+                          </span>
+                        </div>
+                      ) : (
+                        <span className="text-sm text-orange-600 font-medium">
+                          Draft
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
                 <Button
                   onClick={handleDeploy}
-                  disabled={deployStatus !== "idle"}
-                  className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 rounded-xl px-6 py-3"
+                  disabled={isDeployed || deployStatus !== "idle"}
+                  className={`rounded-xl px-6 py-3 ${
+                    isDeployed
+                      ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                      : "bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
+                  }`}
                 >
                   {deployStatus === "deploying" ? (
                     <>
@@ -140,7 +180,17 @@ const ChatBot = () => {
                     </>
                   ) : deployStatus === "deployed" ? (
                     <>
-                      <ExternalLink className="w-4 h-4 mr-2" />
+                      <CheckCircle className="w-4 h-4 mr-2" />
+                      Deployed!
+                    </>
+                  ) : deployStatus === "error" ? (
+                    <>
+                      <AlertCircle className="w-4 h-4 mr-2" />
+                      Error
+                    </>
+                  ) : isDeployed ? (
+                    <>
+                      <CheckCircle className="w-4 h-4 mr-2" />
                       Deployed
                     </>
                   ) : (
@@ -152,11 +202,14 @@ const ChatBot = () => {
                 </Button>
               </div>
 
-              {deployStatus === "deployed" && (
+              {(deployStatus === "deployed" || isDeployed) && (
                 <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl">
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-green-800 font-medium">
-                      🎉 Successfully deployed!
+                      🎉{" "}
+                      {deployStatus === "deployed"
+                        ? "Successfully deployed!"
+                        : "Chatbot is live!"}
                     </span>
                     <Button
                       size="sm"
@@ -175,6 +228,14 @@ const ChatBot = () => {
                 </div>
               )}
 
+              {deployStatus === "error" && (
+                <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl">
+                  <span className="text-sm text-red-800 font-medium">
+                    ❌ Failed to deploy. Please try again.
+                  </span>
+                </div>
+              )}
+
               <div className="space-y-6">
                 {/* Description */}
                 {chatbot.description && (
@@ -182,8 +243,17 @@ const ChatBot = () => {
                     <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center">
                       <MessageSquare className="w-4 h-4 mr-2 text-blue-500" />
                       Description
+                      {isDeployed && (
+                        <span className="ml-2 text-xs text-gray-400">
+                          (Read-only)
+                        </span>
+                      )}
                     </h3>
-                    <p className="text-sm text-gray-600 bg-gray-50 p-4 rounded-xl leading-relaxed">
+                    <p
+                      className={`text-sm text-gray-600 p-4 rounded-xl leading-relaxed ${
+                        isDeployed ? "bg-gray-100" : "bg-gray-50"
+                      }`}
+                    >
                       {chatbot.description}
                     </p>
                   </div>
@@ -194,8 +264,17 @@ const ChatBot = () => {
                   <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center">
                     <Settings className="w-4 h-4 mr-2 text-purple-500" />
                     Agent Instructions
+                    {isDeployed && (
+                      <span className="ml-2 text-xs text-gray-400">
+                        (Read-only)
+                      </span>
+                    )}
                   </h3>
-                  <div className="text-sm text-gray-600 bg-gray-50 p-4 rounded-xl max-h-32 overflow-y-auto leading-relaxed">
+                  <div
+                    className={`text-sm text-gray-600 p-4 rounded-xl max-h-32 overflow-y-auto leading-relaxed ${
+                      isDeployed ? "bg-gray-100" : "bg-gray-50"
+                    }`}
+                  >
                     {chatbot.instructions}
                   </div>
                 </div>
@@ -206,8 +285,17 @@ const ChatBot = () => {
                     <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center">
                       <Bot className="w-4 h-4 mr-2 text-green-500" />
                       Context Information
+                      {isDeployed && (
+                        <span className="ml-2 text-xs text-gray-400">
+                          (Read-only)
+                        </span>
+                      )}
                     </h3>
-                    <div className="text-sm text-gray-600 bg-gray-50 p-4 rounded-xl max-h-32 overflow-y-auto leading-relaxed">
+                    <div
+                      className={`text-sm text-gray-600 p-4 rounded-xl max-h-32 overflow-y-auto leading-relaxed ${
+                        isDeployed ? "bg-gray-100" : "bg-gray-50"
+                      }`}
+                    >
                       {chatbot.context}
                     </div>
                   </div>
@@ -224,7 +312,10 @@ const ChatBot = () => {
                   <div className="flex items-center text-sm text-gray-600">
                     <Calendar className="w-4 h-4 mr-2 text-purple-500" />
                     <span>
-                      Created {new Date(chatbot.createdAt).toLocaleDateString()}
+                      {isDeployed && chatbot.deployedAt
+                        ? "Deployed"
+                        : "Updated"}{" "}
+                      {lastUpdated.toLocaleDateString()}
                     </span>
                   </div>
                 </div>

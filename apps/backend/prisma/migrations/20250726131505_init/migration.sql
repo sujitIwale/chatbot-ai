@@ -15,8 +15,12 @@ CREATE TABLE "User" (
 CREATE TABLE "Chatbot" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
+    "description" TEXT,
     "instructions" TEXT NOT NULL,
+    "context" TEXT,
     "ownerId" TEXT NOT NULL,
+    "deployed" BOOLEAN NOT NULL DEFAULT false,
+    "deployedAt" TIMESTAMP(3),
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -40,7 +44,6 @@ CREATE TABLE "Ticket" (
     "id" TEXT NOT NULL,
     "subject" TEXT NOT NULL,
     "sessionId" TEXT NOT NULL,
-    "status" TEXT NOT NULL DEFAULT 'open',
     "chatbotId" TEXT NOT NULL,
     "assignedTo" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,

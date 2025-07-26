@@ -20,6 +20,17 @@ export const chatbotApi = {
     const response = await client.post("/api/chatbot/create", data);
     return response.data;
   },
+
+  deployChatbot: async (id: string, data: {
+    name: string;
+    description?: string;
+    instructions: string;
+    context?: string;
+  }) => {
+    const response = await client.post(`/api/chatbot/${id}/deploy`, data);
+    return response.data;
+  },
+
   getCustomerSupportUsers: async (chatbotId: string) => {
     const response = await client.get(`/api/chatbot/${chatbotId}/users`);
     return response.data;

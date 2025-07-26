@@ -1,7 +1,11 @@
 import { useEffect } from "react";
 import { useState } from "react";
 import AuthContext from "./AuthContext";
-import { getToken, handleGoogleAuthCallback } from "../../utils/auth";
+import {
+  getToken,
+  handleGoogleAuthCallback,
+  tryLogout,
+} from "../../utils/auth";
 import { userApi } from "../../api/user";
 import { authApi } from "../../api/auth";
 
@@ -23,6 +27,9 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setUser(response.data);
         setIsAuthenticated(true);
       } catch (error) {
+        setUser(null);
+        setIsAuthenticated(false);
+        tryLogout();
         console.error(error);
       } finally {
         setLoading(false);

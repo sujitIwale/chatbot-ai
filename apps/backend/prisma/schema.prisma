@@ -24,14 +24,16 @@ model User {
 }
 
 model Chatbot {
-  id           String   @id @default(uuid())
+  id           String    @id @default(uuid())
   name         String
   description  String?
   instructions String
   context      String?
   ownerId      String
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  deployed     Boolean   @default(false)
+  deployedAt   DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 
   owner                User                  @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   customerSupportUsers CustomerSupportUser[]

@@ -69,21 +69,25 @@ export const createChatbot = async (req: Request, res: Response) => {
 };
 
 export const deployChatbot = async (req: Request, res: Response) => {
+  const { name, description, instructions, context } = req.body;
   const { chatbotId } = req.params;
 
   try {
-    const chatbot = await prisma.chatbot.findUnique({
+    const chatbot = await prisma.chatbot.update({
       where: {
         id: chatbotId,
         ownerId: req.user?.id,
       },
+      data: {
+        name,
+        description,
+        instructions,
+        context,
+        deployed: true,
+        deployedAt: new Date(),
+      },
     });
 
-    if (!chatbot) {
-      return res.status(404).json({ error: "Chatbot not found" });
-    }
-
-    // TODO: Implement actual deployment logic
     res.json({ message: "Chatbot deployed successfully" });
   } catch (error) {
     res.status(500).json({ error: "Failed to deploy chatbot" });
