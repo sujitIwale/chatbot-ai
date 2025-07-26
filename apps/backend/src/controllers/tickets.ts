@@ -1,13 +1,42 @@
 import { Request, Response } from "express";
 import prisma from "../lib/db";
+import { assignTicketToSupportUser, reassignTicket, getSupportUserTicketStats } from "../services/ticketAssignment";
 
 export const createTicket = async (req: Request, res: Response) => {
-  const { subject,  assignedTo ,sessionId} = req.body;
+  const { subject, assignedTo, sessionId } = req.body;
   const { chatbotId } = req.params;
 
   try {
+    let finalAssignedTo = assignedTo;
+    
+    if (!finalAssignedTo) {
+      const assignedUser = await assignTicketToSupportUser(chatbotId);
+      finalAssignedTo = assignedUser.id;
+    }
+
     const ticket = await prisma.ticket.create({
-      data: { subject, assignedTo, sessionId, chatbotId },
+      data: { 
+        subject, 
+        assignedTo: finalAssignedTo, 
+        sessionId, 
+        chatbotId
+      },
+      include: {
+        assignedUser: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          }
+        },
+        chatSession: {
+          select: {
+            id: true,
+            userId: true,
+            status: true,
+          }
+        }
+      }
     });
 
     res.status(201).json(ticket);
@@ -19,10 +48,17 @@ export const createTicket = async (req: Request, res: Response) => {
 
 export const getTickets = async (req: Request, res: Response) => {
   const { chatbotId } = req.params;
+  const { assignedTo } = req.query;
 
   try {
+    const whereClause: any = { chatbotId };
+    
+    if (assignedTo) {
+      whereClause.assignedTo = assignedTo;
+    }
+
     const tickets = await prisma.ticket.findMany({
-      where: { chatbotId },
+      where: whereClause,
       include: {
         assignedUser: {
           select: {
@@ -31,11 +67,57 @@ export const getTickets = async (req: Request, res: Response) => {
             email: true,
           },
         },
+        chatSession: {
+          select: {
+            id: true,
+            userId: true,
+            status: true,
+            createdAt: true,
+          }
+        }
       },
+      orderBy: { createdAt: 'desc' }
     });
 
     res.status(200).json(tickets);
   } catch (error) {
+    console.error('Error getting tickets:', error);
     res.status(500).json({ error: "Failed to get tickets" });
+  }
+};
+
+export const reassignTicketHandler = async (req: Request, res: Response) => {
+  const { ticketId } = req.params;
+  const { newSupportUserId } = req.body;
+
+  try {
+    const ticket = await reassignTicket(ticketId, newSupportUserId);
+    res.status(200).json(ticket);
+  } catch (error) {
+    console.error('Error reassigning ticket:', error);
+    res.status(500).json({ error: "Failed to reassign ticket" });
+  }
+};
+
+export const getTicketStats = async (req: Request, res: Response) => {
+  const { chatbotId } = req.params;
+
+  try {
+    const supportUserStats = await getSupportUserTicketStats(chatbotId);
+    
+    // Get overall ticket stats
+    const totalTickets = await prisma.ticket.count({
+      where: { chatbotId }
+    });
+
+    res.status(200).json({
+      supportUsers: supportUserStats,
+      overall: {
+        total: totalTickets
+      }
+    });
+  } catch (error) {
+    console.error('Error getting ticket stats:', error);
+    res.status(500).json({ error: "Failed to get ticket statistics" });
   }
 };

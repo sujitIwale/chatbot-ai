@@ -24,24 +24,24 @@ interface IChatBot {
 }
 
 const ChatBotEmbed = () => {
-  const { id } = useParams<{ id: string }>();
+  const { chatbotId } = useParams<{ chatbotId: string }>();
   const navigate = useNavigate();
   const [chatbot, setChatbot] = useState<IChatBot | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (id) {
+    if (chatbotId) {
       fetchChatbot();
     } else {
       navigate("/dashboard");
     }
-  }, [id, navigate]);
+  }, [chatbotId, navigate]);
 
   const fetchChatbot = async () => {
     try {
       setLoading(true);
-      const data = await chatbotApi.getChatbot(id!);
+      const data = await chatbotApi.getChatbot(chatbotId!);
       setChatbot(data);
       setError(null);
     } catch (err) {

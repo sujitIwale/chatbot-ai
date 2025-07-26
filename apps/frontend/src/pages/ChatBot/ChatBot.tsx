@@ -35,7 +35,7 @@ interface IChatBot {
 }
 
 const ChatBot = () => {
-  const { id } = useParams<{ id: string }>();
+  const { chatbotId } = useParams<{ chatbotId: string }>();
   const navigate = useNavigate();
   const [chatbot, setChatbot] = useState<IChatBot | null>(null);
   const [loading, setLoading] = useState(true);
@@ -43,19 +43,20 @@ const ChatBot = () => {
   const [deployStatus, setDeployStatus] = useState<
     "idle" | "deploying" | "deployed" | "error"
   >("idle");
+  const [currentSessionId, setCurrentSessionId] = useState<string>("");
 
   useEffect(() => {
-    if (id) {
+    if (chatbotId) {
       fetchChatbot();
     } else {
-      navigate("/dashboard");
+      // navigate("/dashboard");
     }
-  }, [id, navigate]);
+  }, [chatbotId, navigate]);
 
   const fetchChatbot = async () => {
     try {
       setLoading(true);
-      const data = await chatbotApi.getChatbot(id!);
+      const data = await chatbotApi.getChatbot(chatbotId!);
       setChatbot(data);
       setError(null);
     } catch (err) {
@@ -325,7 +326,42 @@ const ChatBot = () => {
 
           {/* Right Side - Chat Widget */}
           <div>
-            <ChatWidget chatbotName={chatbot.name} chatbotId={chatbot.id} />
+            {chatbot.deployed ? (
+              <ChatWidget
+                chatbotName={chatbot.name}
+                chatbotId={chatbot.id}
+                onSessionChange={setCurrentSessionId}
+              />
+            ) : (
+              <div className="bg-white rounded-2xl shadow-sm p-6">
+                <div className="h-96 flex items-center justify-center">
+                  <div className="text-center p-8">
+                    <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Loader2 className="w-8 h-8 text-yellow-600 animate-spin" />
+                    </div>
+                    <h4 className="text-lg font-semibold text-gray-900 mb-2">
+                      Setting up your AI Agent
+                    </h4>
+                    <p className="text-gray-600 mb-4">
+                      Your chatbot is being initialized. This may take a moment.
+                    </p>
+                    <Button
+                      onClick={fetchChatbot}
+                      className="bg-blue-600 hover:bg-blue-700"
+                    >
+                      Check Status
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
+            {currentSessionId && (
+              <div className="mt-4 text-center">
+                <p className="text-xs text-gray-500">
+                  Session ID: {currentSessionId}
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </div>

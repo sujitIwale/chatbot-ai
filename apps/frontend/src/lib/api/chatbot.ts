@@ -35,6 +35,7 @@ export const chatbotApi = {
     const response = await client.get(`/api/chatbot/${chatbotId}/users`);
     return response.data;
   },
+
   createCustomerSupportUser: async (chatbotId: string, data: {
     name: string;
     email: string;
@@ -45,10 +46,16 @@ export const chatbotApi = {
     });
     return response.data;
   },
+
   getTickets: async (chatbotId: string) => {
     const response = await client.get(`/api/chatbot/${chatbotId}/tickets`);
     return response.data;
   },
+  getTicketStats: async (chatbotId: string) => {
+    const response = await client.get(`/api/chatbot/${chatbotId}/tickets/stats`);
+    return response.data;
+  },
+
   createTicket: async (chatbotId: string, data: {
     subject: string;
     sessionId: string;
@@ -57,4 +64,44 @@ export const chatbotApi = {
     const response = await client.post(`/api/chatbot/${chatbotId}/ticket/create`, data);
     return response.data;
   },
+
+  reassignTicket: async (ticketId: string, newSupportUserId: string) => {
+    const response = await client.put(`/api/chatbot/ticket/${ticketId}/reassign`, {
+      newSupportUserId
+    });
+    return response.data;
+  },
+
+  // Chat API methods
+  sendMessage: async (chatbotId: string, data: {
+    message: string;
+    sessionId: string;
+    userId?: string;
+  }) => {
+    const response = await client.post(`/api/chatbot/${chatbotId}/chat/message`, data);
+    return response.data;
+  },
+
+  getChatHistory: async (sessionId: string) => {
+    const response = await client.get(`/api/chatbot/chat/session/${sessionId}/history`);
+    return response.data;
+  },
+
+  getSessionInfo: async (sessionId: string) => {
+    const response = await client.get(`/api/chatbot/chat/session/${sessionId}/info`);
+    return response.data;
+  },
+
+  sendSupportMessage: async (sessionId: string, data: {
+    message: string;
+    supportUserId: string;
+  }) => {
+    const response = await client.post(`/api/chatbot/chat/session/${sessionId}/support-message`, data);
+    return response.data;
+  },
+
+  // Utility method to generate session ID
+  generateSessionId: () => {
+    return `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  }
 };

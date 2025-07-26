@@ -4,6 +4,7 @@ import { Input } from "../../components/ui/input";
 import { Textarea } from "../../components/ui/textarea";
 import { Button } from "../../components/ui/button";
 import { chatbotApi } from "../../lib/api/chatbot";
+import { CheckCircle, AlertCircle, Loader2 } from "lucide-react";
 
 const CreateChatBot = () => {
   const navigate = useNavigate();
@@ -14,6 +15,12 @@ const CreateChatBot = () => {
     context: "",
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [creationStatus, setCreationStatus] = useState<{
+    success: boolean;
+    message: string;
+    agentInitialized: boolean;
+    chatbotId?: string;
+  } | null>(null);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -39,21 +46,45 @@ const CreateChatBot = () => {
     }
 
     setIsLoading(true);
+    setCreationStatus(null);
 
     try {
-      const chatbot = await chatbotApi.createChatbot({
+      const response = await chatbotApi.createChatbot({
         name: formData.name,
         description: formData.description || undefined,
         instructions: formData.agentInstructions,
         context: formData.context || undefined,
       });
 
-      // Redirect to the created chatbot
-      navigate(`/chatbot/${chatbot.id}`);
+      // Handle the new response format
+      setCreationStatus({
+        success: true,
+        message: response.message || "Chatbot created successfully!",
+        agentInitialized: response.agentInitialized !== false,
+        chatbotId: response.id,
+      });
+
+      // Auto-redirect after 3 seconds if successful
+      if (response.id) {
+        setTimeout(() => {
+          navigate(`/chatbot/${response.id}`);
+        }, 3000);
+      }
     } catch (error) {
-      alert("Failed to create chatbot. Please try again.");
+      console.error("Error creating chatbot:", error);
+      setCreationStatus({
+        success: false,
+        message: "Failed to create chatbot. Please try again.",
+        agentInitialized: false,
+      });
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleGoToChatbot = () => {
+    if (creationStatus?.chatbotId) {
+      navigate(`/chatbot/${creationStatus.chatbotId}`);
     }
   };
 
@@ -67,9 +98,74 @@ const CreateChatBot = () => {
                 Create New ChatBot
               </h1>
               <p className="text-gray-600">
-                Configure your AI agent with a name and specific instructions
+                Configure your AI-powered customer support agent with context
+                and instructions
               </p>
             </div>
+
+            {/* Success/Error Status */}
+            {creationStatus && (
+              <div
+                className={`mb-6 p-4 rounded-lg border ${
+                  creationStatus.success
+                    ? "bg-green-50 border-green-200"
+                    : "bg-red-50 border-red-200"
+                }`}
+              >
+                <div className="flex items-start space-x-3">
+                  {creationStatus.success ? (
+                    <CheckCircle className="w-5 h-5 text-green-600 mt-0.5" />
+                  ) : (
+                    <AlertCircle className="w-5 h-5 text-red-600 mt-0.5" />
+                  )}
+                  <div className="flex-1">
+                    <p
+                      className={`font-medium ${
+                        creationStatus.success
+                          ? "text-green-800"
+                          : "text-red-800"
+                      }`}
+                    >
+                      {creationStatus.message}
+                    </p>
+                    {creationStatus.success && (
+                      <div className="mt-2 space-y-2">
+                        <div className="flex items-center space-x-2 text-sm">
+                          <div
+                            className={`w-2 h-2 rounded-full ${
+                              creationStatus.agentInitialized
+                                ? "bg-green-500"
+                                : "bg-yellow-500"
+                            }`}
+                          ></div>
+                          <span className="text-green-700">
+                            {creationStatus.agentInitialized
+                              ? "AI Agent initialized successfully"
+                              : "AI Agent initialization in progress"}
+                          </span>
+                        </div>
+                        <div className="mt-3 flex space-x-3">
+                          <Button
+                            onClick={handleGoToChatbot}
+                            className="bg-green-600 hover:bg-green-700"
+                            size="sm"
+                          >
+                            Go to Chatbot
+                          </Button>
+                          <Button
+                            onClick={() => setCreationStatus(null)}
+                            variant="outline"
+                            size="sm"
+                          >
+                            Create Another
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
 
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
@@ -90,7 +186,7 @@ const CreateChatBot = () => {
                   disabled={isLoading}
                 />
                 <p className="mt-1 text-sm text-gray-500">
-                  Choose a memorable name for your chatbot
+                  Choose a memorable name for your customer support chatbot
                 </p>
               </div>
 
@@ -104,14 +200,14 @@ const CreateChatBot = () => {
                 <Textarea
                   id="description"
                   name="description"
-                  placeholder="Brief description of what your chatbot does..."
+                  placeholder="Brief description of your chatbot's purpose..."
                   value={formData.description}
                   onChange={handleInputChange}
                   className="w-full min-h-[80px]"
                   disabled={isLoading}
                 />
                 <p className="mt-1 text-sm text-gray-500">
-                  Optional brief description of your chatbot's purpose
+                  Optional description of your chatbot's main purpose
                 </p>
               </div>
 
@@ -125,15 +221,15 @@ const CreateChatBot = () => {
                 <Textarea
                   id="agentInstructions"
                   name="agentInstructions"
-                  placeholder="Describe how your chatbot should behave, its role, and any specific guidelines it should follow..."
+                  placeholder="Describe how your customer support agent should behave, what it should help with, and any specific guidelines..."
                   value={formData.agentInstructions}
                   onChange={handleInputChange}
                   className="w-full min-h-[120px]"
                   disabled={isLoading}
                 />
                 <p className="mt-1 text-sm text-gray-500">
-                  Provide detailed instructions on how your agent should respond
-                  and behave
+                  Provide detailed instructions on how your AI agent should
+                  handle customer inquiries
                 </p>
               </div>
 
@@ -147,15 +243,14 @@ const CreateChatBot = () => {
                 <Textarea
                   id="context"
                   name="context"
-                  placeholder="Additional context, knowledge base, or background information for your chatbot..."
+                  placeholder="Company information, product details, policies, or any knowledge your chatbot should be aware of..."
                   value={formData.context}
                   onChange={handleInputChange}
                   className="w-full min-h-[100px]"
                   disabled={isLoading}
                 />
                 <p className="mt-1 text-sm text-gray-500">
-                  Optional context or knowledge that your chatbot should be
-                  aware of
+                  Background information and knowledge base for your AI agent
                 </p>
               </div>
 
@@ -175,8 +270,19 @@ const CreateChatBot = () => {
                 >
                   Clear Form
                 </Button>
-                <Button type="submit" disabled={isLoading}>
-                  {isLoading ? "Creating..." : "Create ChatBot"}
+                <Button
+                  type="submit"
+                  disabled={isLoading}
+                  className="bg-blue-600 hover:bg-blue-700"
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Creating & Setting up AI Agent...
+                    </>
+                  ) : (
+                    "Create ChatBot"
+                  )}
                 </Button>
               </div>
             </form>

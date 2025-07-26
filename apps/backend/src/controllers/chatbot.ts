@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import prisma from "../lib/db";
+import { lyzrManagerAgent } from "../client/lyzr";
 
 export const getChatbots = async (req: Request, res: Response) => {
 
@@ -48,6 +49,7 @@ export const createChatbot = async (req: Request, res: Response) => {
   const { name, description, instructions, context } = req.body;
 
   try {
+    // Create the chatbot first
     const chatbot = await prisma.chatbot.create({
       data: {
         name,
@@ -61,9 +63,43 @@ export const createChatbot = async (req: Request, res: Response) => {
         },
       },
     });
-  
-    res.status(201).json(chatbot);
+    try {
+      const { agentId } = await lyzrManagerAgent.initialize({
+        id: chatbot.id,
+        name: chatbot.name,
+        description: chatbot.description || undefined,
+        instructions: chatbot.instructions,
+        context: chatbot.context || undefined
+      });
+
+      console.log({agentId})
+      const updatedChatbot = await prisma.chatbot.update({
+        where: { id: chatbot.id },
+        data: {
+          lyzrAgentId: agentId,
+          deployed: true,
+          deployedAt: new Date()
+        }
+      });
+
+      res.status(201).json({
+        ...updatedChatbot,
+        agentInitialized: true,
+        message: "Chatbot created and AI agent initialized successfully"
+      });
+    } catch (agentError) {
+      console.error('Error initializing Lyzr agent:', agentError);
+      
+      // Return the chatbot even if agent initialization fails
+      res.status(201).json({
+        ...chatbot,
+        agentInitialized: false,
+        message: "Chatbot created but AI agent initialization failed. You can retry deployment later.",
+        error: "Agent initialization failed"
+      });
+    }
   } catch (error) {
+    console.error('Error creating chatbot:', error);
     res.status(500).json({ error: "Failed to create chatbot" });
   }
 };
@@ -88,7 +124,36 @@ export const deployChatbot = async (req: Request, res: Response) => {
       },
     });
 
-    res.json({ message: "Chatbot deployed successfully" });
+    // Initialize or update Lyzr agent
+    try {
+      const { agentId } = await lyzrManagerAgent.initialize({
+        id: chatbot.id,
+        name: chatbot.name,
+        description: chatbot.description || undefined,
+        instructions: chatbot.instructions,
+        context: chatbot.context || undefined
+      });
+      
+      // Update chatbot with Lyzr IDs
+      await prisma.chatbot.update({
+        where: { id: chatbotId },
+        data: {
+          lyzrAgentId: agentId
+        }
+      });
+
+      res.json({ 
+        message: "Chatbot deployed and AI agent updated successfully",
+        agentInitialized: true
+      });
+    } catch (agentError) {
+      console.error('Error updating Lyzr agent:', agentError);
+      res.json({ 
+        message: "Chatbot deployed but AI agent update failed",
+        agentInitialized: false,
+        error: "Agent update failed"
+      });
+    }
   } catch (error) {
     res.status(500).json({ error: "Failed to deploy chatbot" });
   }

@@ -1,8 +1,17 @@
 import axios from "axios";
 
-const lyzrManagerUrl = process.env.LYZR_MANAGER_URL;
 
-export const lyzrManagerClient = axios.create({
-  baseURL: lyzrManagerUrl,
+const lyzrClient = axios.create({
+  baseURL: process.env.LYZR_API_URL,
   withCredentials: true,
 });
+
+lyzrClient.interceptors.request.use((config) => {
+  const token = process.env.LYZR_API_KEY;
+  if (token) {
+    config.headers['x-api-key'] = `${token}`;
+  }
+  return config;
+});
+
+export default lyzrClient;

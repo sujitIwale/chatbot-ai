@@ -24,20 +24,21 @@ model User {
 }
 
 model Chatbot {
-  id           String    @id @default(uuid())
-  name         String
-  description  String?
-  instructions String
-  context      String?
-  ownerId      String
-  deployed     Boolean   @default(false)
-  deployedAt   DateTime?
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
-
+  id                   String                @id @default(uuid())
+  name                 String
+  description          String?
+  instructions         String
+  context              String?
+  ownerId              String
+  deployed             Boolean               @default(false)
+  deployedAt           DateTime?
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+  lyzrAgentId          String?
   owner                User                  @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   customerSupportUsers CustomerSupportUser[]
   tickets              Ticket[]
+  chatSessions         ChatSession[]
 }
 
 model CustomerSupportUser {
@@ -48,8 +49,9 @@ model CustomerSupportUser {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  chatbot         Chatbot  @relation(fields: [chatbotId], references: [id], onDelete: Cascade)
+  chatbot         Chatbot   @relation(fields: [chatbotId], references: [id], onDelete: Cascade)
   assignedTickets Ticket[]
+  messages        Message[]
 
   @@unique([email, chatbotId])
 }
@@ -65,4 +67,44 @@ model Ticket {
 
   chatbot      Chatbot              @relation(fields: [chatbotId], references: [id], onDelete: Cascade)
   assignedUser CustomerSupportUser? @relation(fields: [assignedTo], references: [id], onDelete: SetNull)
+  chatSession  ChatSession          @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+}
+
+model ChatSession {
+  id          String        @id @default(uuid())
+  chatbotId   String
+  userId      String? // Optional customer identifier
+  status      SessionStatus @default(ACTIVE)
+  handedOff   Boolean       @default(false)
+  handedOffAt DateTime?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  chatbot  Chatbot   @relation(fields: [chatbotId], references: [id], onDelete: Cascade)
+  messages Message[]
+  tickets  Ticket[]
+}
+
+model Message {
+  id        String        @id @default(uuid())
+  sessionId String
+  content   String
+  sender    MessageSender
+  senderId  String? // Customer Support User ID if sender is SUPPORT
+  createdAt DateTime      @default(now())
+
+  session      ChatSession          @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  supportAgent CustomerSupportUser? @relation(fields: [senderId], references: [id], onDelete: SetNull)
+}
+
+enum SessionStatus {
+  ACTIVE
+  ENDED
+  HANDED_OFF
+}
+
+enum MessageSender {
+  USER
+  AGENT
+  SUPPORT
 }

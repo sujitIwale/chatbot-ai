@@ -26,10 +26,19 @@ function App() {
           <Route element={<AppLayout />}>
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/create" element={<CreateChatBot />} />
-            <Route path="/chatbot/:id" element={<ChatBot />} />
-            <Route path="/chatbot/:id/tickets" element={<ChatBotTickets />} />
-            <Route path="/chatbot/:id/support" element={<ChatBotSupport />} />
-            <Route path="/chatbot/:id/embed" element={<ChatBotEmbed />} />
+            <Route path="/chatbot/:chatbotId" element={<ChatBot />} />
+            <Route
+              path="/chatbot/:chatbotId/tickets"
+              element={<ChatBotTickets />}
+            />
+            <Route
+              path="/chatbot/:chatbotId/support"
+              element={<ChatBotSupport />}
+            />
+            <Route
+              path="/chatbot/:chatbotId/embed"
+              element={<ChatBotEmbed />}
+            />
           </Route>
         </Route>
       </Routes>

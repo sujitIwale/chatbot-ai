@@ -13,7 +13,7 @@ interface CustomerSupportUser {
 }
 
 const CustomerSupportPanel: React.FC = () => {
-  const { id: chatbotId } = useParams<{ id: string }>();
+  const { chatbotId } = useParams<{ chatbotId: string }>();
   const [users, setUsers] = useState<CustomerSupportUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
