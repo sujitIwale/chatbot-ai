@@ -12,6 +12,8 @@ AI-powered customer support chatbot platform. Create intelligent support agents 
 - Smart agent assignment to support team
 - Knowledge base integration with RAG
 - Google OAuth authentication
+- User management 
+- Ticket management
 
 ## Tech Stack
 
