@@ -4,11 +4,14 @@ import FormData from "form-data";
 import * as fs from "fs";
 import * as path from "path";
 import * as os from "os";
+import { agentInstructions, escalationPhrase } from "../constants/agent";
 
 interface AgentConfig {
   name: string;
-  system_prompt: string;
   description: string;
+  agent_role: string;
+  agent_instructions: string;
+  agent_goal: string;
   features: Array<{
     type: string;
     config: Record<string, any>;
@@ -21,6 +24,7 @@ interface AgentConfig {
   top_p: number;
   temperature: number;
   response_format?: Record<string, any>;
+  version: number;
 }
 
 interface ChatRequest {
@@ -208,9 +212,13 @@ class CustomerSupportAgent {
 
     // Try to create knowledge base if context is provided, but don't block agent creation if it fails
     let knowledgeBaseCreated = false;
+    let collectionName: string | undefined;
     if (chatbot.context) {
       try {
         console.log("Creating knowledge base with provided context...");
+        
+        // Create collection name
+        collectionName = `kb_${chatbot.id}_${Date.now()}`;
         
         // Create RAG configuration
         const ragConfig: RAGConfig = {
@@ -219,7 +227,7 @@ class CustomerSupportAgent {
           embedding_credential_id: "lyzr_openai", 
           vector_db_credential_id: "lyzr_qdrant",
           description: `Knowledge base for ${chatbot.name} chatbot`,
-          collection_name: `kb_${chatbot.id}_${Date.now()}`,
+          collection_name: collectionName,
           llm_model: "gpt-4o-mini",
           embedding_model: "text-embedding-3-small",
           vector_store_provider: "qdrant",
@@ -253,25 +261,14 @@ class CustomerSupportAgent {
       // Create customer support agent (with or without RAG integration)
       const agentConfig: AgentConfig = {
         name: chatbot.name,
-        system_prompt: `You are a helpful Customer Support Agent for ${chatbot.name}. 
-
-${ragId ? `You have access to a knowledge base containing relevant information about ${chatbot.name}. Use this knowledge base to provide accurate and contextual responses.` : chatbot.context ? `Note: A knowledge base was intended to be created for this chatbot but is currently unavailable. Please provide general support based on your training.` : ""}
-
-INSTRUCTIONS: ${chatbot.instructions}
-
-Your role is to:
-1. Handle complaints professionally and empathetically  
-2. Provide troubleshooting guidance and solutions based on available knowledge
-3. Be friendly, professional, and helpful at all times
-${ragId ? '4. Use the knowledge base to provide accurate information when available' : '4. Provide general support based on your training'}
-5. If you cannot resolve an issue or don't have enough information, politely indicate that you need to switch to a human agent
-
-IMPORTANT: If you cannot provide a satisfactory answer or resolve the customer's issue, respond with exactly this phrase at the end of your message: "[SWITCH_TO_HUMAN]"
-
-Always try your best to help first using available knowledge, but don't hesitate to escalate when needed.`,
         description:
           chatbot.description ||
           `AI-powered customer support agent for ${chatbot.name} that handles customer queries${ragId ? ' with knowledge base support' : ''}`,
+        agent_role: `You are an Expert Customer Support Agent for ${chatbot.name}.`,
+        agent_instructions: `${chatbot.instructions}
+        ${agentInstructions}
+        `,
+        agent_goal: `Your goal is to resolve customer queries for ${chatbot.name} and provide exceptional customer support.`,
         features: [
           {
             type: "SHORT_TERM_MEMORY",
@@ -282,9 +279,19 @@ Always try your best to help first using available knowledge, but don't hesitate
           ...(ragId ? [{
             type: "KNOWLEDGE_BASE",
             config: {
-              kb_id: knowledgeBaseCreated ? ragId : "688512f932989c453d15d6a7"
+              lyzr_rag: {
+                base_url: "https://rag-prod.studio.lyzr.ai",
+                rag_id: ragId,
+                rag_name: collectionName || `kb_${chatbot.id}`,
+                params: {
+                  top_k: 5,
+                  retrieval_type: "basic",
+                  score_threshold: 0
+                }
+              },
+              agentic_rag: []
             },
-            priority: 1,
+            priority: 0,
           }] : [])
         ],
         tools: [],
@@ -292,6 +299,7 @@ Always try your best to help first using available knowledge, but don't hesitate
         model: "gpt-4o-mini",
         top_p: 0.9,
         temperature: 0.7,
+        version: 3,
         llm_credential_id: "lyzr_openai",
         response_format: {},
       };
@@ -336,12 +344,12 @@ Always try your best to help first using available knowledge, but don't hesitate
     const response = await this.lyzr.chatWithAgent(chatRequest);
 
     // Check if agent indicates escalation is needed
-    const needsEscalation = response.response.includes("[SWITCH_TO_HUMAN]");
+    const needsEscalation = response.response.includes(escalationPhrase);
 
     return {
       ...response,
       can_handle: !needsEscalation,
-      response: response.response.replace("[SWITCH_TO_HUMAN]", "").trim(),
+      response: response.response.replace(escalationPhrase, "").trim(),
     };
   }
 
