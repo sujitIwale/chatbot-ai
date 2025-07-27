@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { createChatbot, getChatbot, deployChatbot, createCustomerSupportUser, getCustomerSupportUsers, getChatbots, fixAgent } from "../controllers/chatbot";
 import { authorization } from "../middleware/auth";
-import { createTicket, getTickets,  getTicketStats } from "../controllers/tickets";
+import { createTicket, getTickets } from "../controllers/tickets";
 import { sendMessage, getChatHistory } from "../controllers/chat";
 
 const chatbotRouter: Router = Router();
@@ -20,7 +20,6 @@ chatbotRouter.get("/:chatbotId/users", authorization, getCustomerSupportUsers);
 // tickets
 chatbotRouter.post("/:chatbotId/ticket/create", authorization, createTicket);
 chatbotRouter.get("/:chatbotId/tickets", authorization, getTickets);
-chatbotRouter.get("/:chatbotId/tickets/stats", authorization, getTicketStats);
 
 // chat - admin interactions
 chatbotRouter.post("/:chatbotId/chat/message", sendMessage);

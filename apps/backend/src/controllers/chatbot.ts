@@ -211,7 +211,6 @@ export const getCustomerSupportUsers = async (req: Request, res: Response) => {
       },
     });
 
-    // Transform the response to include ticketCount at the top level
     const usersWithTicketCount = customerSupportUsers.map((user) => ({
       id: user.id,
       name: user.name,

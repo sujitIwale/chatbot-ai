@@ -11,7 +11,7 @@ export const authenticateJWT = async (req: Request, res: Response, next: NextFun
       return;
     }
 
-    const token = authHeader.split(' ')[1]; // Bearer TOKEN format
+    const token = authHeader.split(' ')[1]; 
     
     if (!token) {
       res.status(401).json({ message: 'No token provided' });

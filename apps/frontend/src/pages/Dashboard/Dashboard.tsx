@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Bot, Plus, MessageCircle, MoreVertical } from "lucide-react";
+import { Bot, Plus, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { chatbotApi } from "@/lib/api/chatbot";
 

@@ -1,4 +1,4 @@
-import { ChevronDown, LogOut, User, LayoutDashboard, Bot } from "lucide-react";
+import { LogOut, LayoutDashboard, Bot } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/lib/contexts/auth/AuthContext";
 import { Button } from "@/components/ui/button";

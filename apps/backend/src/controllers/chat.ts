@@ -9,7 +9,6 @@ export const sendMessage = async (req: Request, res: Response) => {
     const { message, sessionId, userId } = req.body;
     
     try {
-        // Get or create chat session
         let chatSession = await prisma.chatSession.findUnique({
             where: { id: sessionId },
             include: { chatbot: true }
@@ -36,18 +35,15 @@ export const sendMessage = async (req: Request, res: Response) => {
             }
         });
 
-        // Check if session has been handed off to human
         if (chatSession.handedOff) {
             return handleHumanSupportMessage(chatSession, message, res);
         }
 
-        // Get chatbot details
         const chatbot = chatSession.chatbot;
         if(!chatbot.lyzrAgentId){
             return res.status(400).json({ error: "Agent not initialized" });
         }
 
-        // Send message to Lyzr agent
         const agentResponse = await customerSupportAgent.sendMessage(
             {
                 lyzrAgentId: chatbot.lyzrAgentId,
@@ -57,7 +53,6 @@ export const sendMessage = async (req: Request, res: Response) => {
             }
         );
 
-        // Save agent response
         await prisma.message.create({
             data: {
                 sessionId,
@@ -115,7 +110,6 @@ export const getChatHistory = async (req: Request, res: Response) => {
 
 async function handleEscalationToHuman(chatSession: any, originalMessage: string):Promise<Message | null> {
     try {
-        // Find support user with least tickets
         const assignedUser = await findAvailableSupportUser(chatSession.chatbotId);
         
         // Create ticket
@@ -143,7 +137,6 @@ async function handleEscalationToHuman(chatSession: any, originalMessage: string
     }
 }
 
-// Helper function to handle messages in human support mode
 async function handleHumanSupportMessage(chatSession: any, message: string, res: Response) {
     const activeTicket = await prisma.ticket.findFirst({
         where: {

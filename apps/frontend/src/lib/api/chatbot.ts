@@ -50,10 +50,6 @@ export const chatbotApi = {
     const response = await client.get(`/api/chatbot/${chatbotId}/tickets`);
     return response.data;
   },
-  getTicketStats: async (chatbotId: string) => {
-    const response = await client.get(`/api/chatbot/${chatbotId}/tickets/stats`);
-    return response.data;
-  },
 
   createTicket: async (chatbotId: string, data: {
     subject: string;

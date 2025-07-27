@@ -126,20 +126,16 @@ const lyzrApis = {
 
     try {
       let fileName = `temp_${Date.now()}_context.txt`;
-      // Create a temporary file
       const tempDir = os.tmpdir();
       tempFilePath = path.join(tempDir, fileName);
 
-      // Write the text content to the temporary file
       fs.writeFileSync(tempFilePath, chatbot.context, "utf-8");
 
       const formData = new FormData();
 
-      // Add form fields exactly as in the working curl command
       formData.append("data_parser", "txt_parser");
       formData.append("extra_info", "{}");
 
-      // Upload the actual file from disk
       formData.append("file", fs.createReadStream(tempFilePath), {
         filename: fileName,
         contentType: "text/plain",
@@ -149,7 +145,6 @@ const lyzrApis = {
         `Uploading file: ${tempFilePath} for RAG ID: ${ragId}`
       );
 
-      // Make the request with proper headers
 
       const response = await ragClient.post(
         `/v3/train/txt/?rag_id=${ragId}`,
@@ -170,7 +165,6 @@ const lyzrApis = {
         }`
       );
     } finally {
-      // Clean up the temporary file
       if (tempFilePath && fs.existsSync(tempFilePath)) {
         try {
           fs.unlinkSync(tempFilePath);

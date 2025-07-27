@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import prisma from "../lib/db";
-import { findAvailableSupportUser,  getSupportUserTicketStats } from "../services/ticketAssignment";
+import { findAvailableSupportUser } from "../services/ticketAssignment";
 
 export const createTicket = async (req: Request, res: Response) => {
   const { subject, assignedTo, sessionId } = req.body;
@@ -85,28 +85,5 @@ export const getTickets = async (req: Request, res: Response) => {
   } catch (error) {
     console.error('Error getting tickets:', error);
     res.status(500).json({ error: "Failed to get tickets" });
-  }
-};
-
-export const getTicketStats = async (req: Request, res: Response) => {
-  const { chatbotId } = req.params;
-
-  try {
-    const supportUserStats = await getSupportUserTicketStats(chatbotId);
-    
-    // Get overall ticket stats
-    const totalTickets = await prisma.ticket.count({
-      where: { chatbotId }
-    });
-
-    res.status(200).json({
-      supportUsers: supportUserStats,
-      overall: {
-        total: totalTickets
-      }
-    });
-  } catch (error) {
-    console.error('Error getting ticket stats:', error);
-    res.status(500).json({ error: "Failed to get ticket statistics" });
   }
 };

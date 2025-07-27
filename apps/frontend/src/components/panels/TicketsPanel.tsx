@@ -143,13 +143,13 @@ const TicketsPanel: React.FC<TicketsPanelProps> = ({ chatbotId }) => {
               Manage customer support tickets. {tickets.length} tickets total.
             </p>
           </div>
-          <Button
+          {/* <Button
             onClick={() => setShowCreateModal(true)}
             className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
           >
             <Plus className="w-4 h-4 mr-2" />
             New Ticket
-          </Button>
+          </Button> */}
         </div>
 
         {/* Tickets Table */}
@@ -162,17 +162,13 @@ const TicketsPanel: React.FC<TicketsPanelProps> = ({ chatbotId }) => {
               <h3 className="text-xl font-semibold text-gray-900 mb-2">
                 No tickets found
               </h3>
-              <p className="text-gray-500 mb-6 max-w-md mx-auto">
-                You haven't created any support tickets yet. Create your first
-                ticket to get started.
-              </p>
-              <Button
+              {/* <Button
                 onClick={() => setShowCreateModal(true)}
                 className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 Create First Ticket
-              </Button>
+              </Button> */}
             </div>
           ) : (
             <div className="overflow-x-auto">
