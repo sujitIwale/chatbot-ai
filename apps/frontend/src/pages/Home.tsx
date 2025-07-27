@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { isAuthenticated, tryLogout } from "../lib/utils/auth";
+import { Button } from "@/components/ui/button";
 
 const Home: React.FC = () => {
   const [authenticated, setAuthenticated] = useState(false);
@@ -19,7 +20,7 @@ const Home: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             <div className="flex items-center">
-              <h1 className="text-xl font-bold text-gray-900">Agentic Chat</h1>
+              <h1 className="text-xl font-bold text-gray-900">Lyzr Chatbot</h1>
             </div>
             <div className="flex items-center space-x-4">
               {authenticated ? (
@@ -38,31 +39,25 @@ const Home: React.FC = () => {
                   </button>
                 </>
               ) : (
-                <Link
-                  to="/login"
-                  className="text-gray-500 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium"
-                >
-                  Login
-                </Link>
+                <Button variant="outline" asChild>
+                  <Link to="/login">Login</Link>
+                </Button>
               )}
             </div>
           </div>
         </div>
       </nav>
 
-      {/* Hero Section */}
       <div className="relative bg-gradient-to-br from-indigo-50 via-white to-purple-50 overflow-hidden">
         <div className="absolute inset-0 bg-white/60"></div>
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center py-20 sm:py-24 lg:py-32">
-            {/* Robot Icon */}
             <div className="mb-8">
               <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-4xl mb-4">
                 🤖
               </div>
             </div>
 
-            {/* Main Heading */}
             <h1 className="text-4xl tracking-tight font-extrabold text-gray-900 sm:text-5xl md:text-6xl lg:text-7xl">
               <span className="block">Create AI Chatbots</span>
               <span className="block text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">
@@ -70,7 +65,6 @@ const Home: React.FC = () => {
               </span>
             </h1>
 
-            {/* Subtitle */}
             <p className="mt-6 max-w-3xl mx-auto text-lg text-gray-600 sm:text-xl md:text-2xl leading-relaxed">
               Transform your customer support with intelligent AI agents that
               work 24/7. Real plug-and-play solution that creates tickets
@@ -94,7 +88,6 @@ const Home: React.FC = () => {
               </span>
             </div>
 
-            {/* CTA Buttons */}
             <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
               <div className="rounded-md shadow-lg">
                 {authenticated ? (
@@ -126,7 +119,6 @@ const Home: React.FC = () => {
         </div>
       </div>
 
-      {/* Features Section */}
       <div id="features" className="py-12 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="lg:text-center">
@@ -208,21 +200,6 @@ const Home: React.FC = () => {
               <div className="relative">
                 <dt>
                   <div className="absolute flex items-center justify-center h-12 w-12 rounded-md bg-indigo-500 text-white">
-                    <span className="text-xl">📊</span>
-                  </div>
-                  <p className="ml-16 text-lg leading-6 font-medium text-gray-900">
-                    Real-time Analytics
-                  </p>
-                </dt>
-                <dd className="mt-2 ml-16 text-base text-gray-500">
-                  Monitor performance, track response times, and gain insights
-                  into customer satisfaction.
-                </dd>
-              </div>
-
-              <div className="relative">
-                <dt>
-                  <div className="absolute flex items-center justify-center h-12 w-12 rounded-md bg-indigo-500 text-white">
                     <span className="text-xl">🌍</span>
                   </div>
                   <p className="ml-16 text-lg leading-6 font-medium text-gray-900">
@@ -239,7 +216,6 @@ const Home: React.FC = () => {
         </div>
       </div>
 
-      {/* CTA Section */}
       <div className="bg-indigo-50">
         <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:py-16 lg:px-8 lg:flex lg:items-center lg:justify-between">
           <h2 className="text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl">

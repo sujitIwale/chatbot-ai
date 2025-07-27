@@ -24,7 +24,7 @@ const Sidebar = () => {
       <div className="flex h-16 items-center justify-center border-b border-gray-200 px-6">
         <div className="flex items-center space-x-2">
           <Bot className="h-8 w-8 text-blue-600" />
-          <span className="text-xl font-bold text-gray-900">Agentic Chat</span>
+          <span className="text-xl font-bold text-gray-900">Lyzr Chatbot</span>
         </div>
       </div>
 
@@ -56,11 +56,6 @@ const Sidebar = () => {
           );
         })}
       </nav>
-
-      {/* Footer */}
-      <div className="border-t border-gray-200 p-4">
-        <p className="text-xs text-gray-500 text-center">© 2024 Agentic Chat</p>
-      </div>
     </div>
   );
 };

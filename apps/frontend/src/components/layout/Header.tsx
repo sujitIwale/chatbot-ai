@@ -31,7 +31,7 @@ const Header = () => {
           <div className="flex items-center space-x-2">
             <Bot className="h-8 w-8 text-blue-600" />
             <h1 className="text-xl font-semibold text-gray-900">
-              Agentic Chat
+              Lyzr Chatbot
             </h1>
           </div>
 
