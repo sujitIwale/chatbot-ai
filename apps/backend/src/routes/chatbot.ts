@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { createChatbot, getChatbot, deployChatbot, createCustomerSupportUser, getCustomerSupportUsers, getChatbots, fixAgent } from "../controllers/chatbot";
 import { authorization } from "../middleware/auth";
-import { createTicket, getTickets, reassignTicketHandler, getTicketStats } from "../controllers/tickets";
+import { createTicket, getTickets,  getTicketStats } from "../controllers/tickets";
 import { sendMessage, getChatHistory, getSessionInfo, sendSupportMessage } from "../controllers/chat";
 
 const chatbotRouter: Router = Router();
@@ -21,7 +21,6 @@ chatbotRouter.get("/:chatbotId/users", authorization, getCustomerSupportUsers);
 chatbotRouter.post("/:chatbotId/ticket/create", authorization, createTicket);
 chatbotRouter.get("/:chatbotId/tickets", authorization, getTickets);
 chatbotRouter.get("/:chatbotId/tickets/stats", authorization, getTicketStats);
-chatbotRouter.put("/ticket/:ticketId/reassign", authorization, reassignTicketHandler);
 
 // chat - customer interactions (no auth required for public chat)
 chatbotRouter.post("/:chatbotId/chat/message", sendMessage);

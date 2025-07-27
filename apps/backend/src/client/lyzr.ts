@@ -41,10 +41,7 @@ interface LyzrAgent {
 
 interface ChatResponse {
   response: string;
-  agent_id: string;
-  session_id: string;
-  confidence?: number;
-  can_handle?: boolean;
+  module_outputs: any
 }
 
 interface RAGConfig {
@@ -89,6 +86,7 @@ const lyzrApis = {
         "/v3/inference/chat/",
         chatRequest
       );
+      console.log('agent chat response', response.data);
       return response.data;
     } catch (error) {
       console.error("Error chatting with agent:", error);
@@ -310,15 +308,14 @@ const customerSupportAgent = {
 
     console.log({ chatRequest });
 
-    const response = await lyzrApis.chatWithAgent(chatRequest);
+    const result = await lyzrApis.chatWithAgent(chatRequest);
 
     // Check if agent indicates escalation is needed
-    const needsEscalation = response.response.includes(escalationPhrase);
+    const needsEscalation = result.response.includes(escalationPhrase);
 
     return {
-      ...response,
       can_handle: !needsEscalation,
-      response: response.response.replace(escalationPhrase, "").trim(),
+      responseMessage: result.response.replace(escalationPhrase, "").trim(),
     };
   },
 };

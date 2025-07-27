@@ -65,13 +65,6 @@ export const chatbotApi = {
     return response.data;
   },
 
-  reassignTicket: async (ticketId: string, newSupportUserId: string) => {
-    const response = await client.put(`/api/chatbot/ticket/${ticketId}/reassign`, {
-      newSupportUserId
-    });
-    return response.data;
-  },
-
   // Chat API methods
   sendMessage: async (chatbotId: string, data: {
     message: string;

@@ -1,3 +1,4 @@
+import { CustomerSupportUser } from "@prisma/client";
 import prisma from "../lib/db";
 
 interface SupportUserWithTicketCount {
@@ -7,12 +8,7 @@ interface SupportUserWithTicketCount {
   ticketCount: number;
 }
 
-/**
- * Assigns a ticket to the customer support user with the fewest tickets
- * @param chatbotId - The chatbot ID to find support users for
- * @returns The assigned support user
- */
-export async function assignTicketToSupportUser(chatbotId: string): Promise<SupportUserWithTicketCount> {
+export async function findAvailableSupportUser(chatbotId: string): Promise<Partial<CustomerSupportUser> & { ticketCount: number } | null> {
   try {
     // Get all customer support users for this chatbot with their ticket counts
     const supportUsers = await prisma.customerSupportUser.findMany({
@@ -30,7 +26,7 @@ export async function assignTicketToSupportUser(chatbotId: string): Promise<Supp
     });
 
     if (supportUsers.length === 0) {
-      throw new Error('No customer support users available for this chatbot');
+      return null;
     }
 
     // Transform to include ticket count at top level and find user with minimum tickets
@@ -47,7 +43,7 @@ export async function assignTicketToSupportUser(chatbotId: string): Promise<Supp
     return assignedUser;
   } catch (error) {
     console.error('Error assigning ticket to support user:', error);
-    throw error;
+    return null;
   }
 }
 
@@ -83,35 +79,3 @@ export async function getSupportUserTicketStats(chatbotId: string): Promise<Supp
     throw error;
   }
 }
-
-/**
- * Reassigns a ticket to a different support user
- * @param ticketId - The ticket ID to reassign
- * @param newSupportUserId - The new support user ID
- * @returns The updated ticket
- */
-export async function reassignTicket(ticketId: string, newSupportUserId: string) {
-  try {
-    const updatedTicket = await prisma.ticket.update({
-      where: { id: ticketId },
-      data: { 
-        assignedTo: newSupportUserId,
-        updatedAt: new Date()
-      },
-      include: {
-        assignedUser: {
-          select: {
-            id: true,
-            name: true,
-            email: true
-          }
-        }
-      }
-    });
-
-    return updatedTicket;
-  } catch (error) {
-    console.error('Error reassigning ticket:', error);
-    throw error;
-  }
-} 

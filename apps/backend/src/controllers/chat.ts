@@ -1,7 +1,8 @@
 import { Request, Response } from "express";
 import { customerSupportAgent } from "../client/lyzr";
 import prisma from "../lib/db";
-import { assignTicketToSupportUser } from "../services/ticketAssignment";
+import { findAvailableSupportUser } from "../services/ticketAssignment";
+import { Message } from "@prisma/client";
 
 export const sendMessage = async (req: Request, res: Response) => {
     const { chatbotId } = req.params;
@@ -60,24 +61,24 @@ export const sendMessage = async (req: Request, res: Response) => {
         await prisma.message.create({
             data: {
                 sessionId,
-                content: agentResponse.response,
+                content: agentResponse.responseMessage,
                 sender: 'AGENT'
             }
         });
 
         // Check if agent couldn't handle the query
         if (!agentResponse.can_handle) {
-            await handleEscalationToHuman(chatSession, message, agentResponse.response);
+            const newMessage = await handleEscalationToHuman(chatSession, message);
             
             return res.status(200).json({
-                response: agentResponse.response,
+                response: agentResponse.responseMessage,
                 escalated: true,
-                message: "Your query has been escalated to our human support team. A support agent will assist you shortly."
+                message: newMessage?.content || "Your query has been escalated to our human support team. A support agent will assist you shortly."
             });
         }
 
         res.status(200).json({
-            response: agentResponse.response,
+            response: agentResponse.responseMessage,
             escalated: false
         });
     } catch (error) {
@@ -184,10 +185,10 @@ export const sendSupportMessage = async (req: Request, res: Response) => {
 };
 
 // Helper function to handle escalation to human support
-async function handleEscalationToHuman(chatSession: any, originalMessage: string, agentResponse: string) {
+async function handleEscalationToHuman(chatSession: any, originalMessage: string):Promise<Message | null> {
     try {
         // Find support user with least tickets
-        const assignedUser = await assignTicketToSupportUser(chatSession.chatbotId);
+        const assignedUser = await findAvailableSupportUser(chatSession.chatbotId);
         
         // Create ticket
         const ticket = await prisma.ticket.create({
@@ -195,33 +196,34 @@ async function handleEscalationToHuman(chatSession: any, originalMessage: string
                 subject: `Customer Query: ${originalMessage.substring(0, 100)}...`,
                 sessionId: chatSession.id,
                 chatbotId: chatSession.chatbotId,
-                assignedTo: assignedUser.id
+                assignedTo: assignedUser?.id
             }
         });
 
-        // Update session to indicate handoff
-        await prisma.chatSession.update({
-            where: { id: chatSession.id },
-            data: {
-                handedOff: true,
-                handedOffAt: new Date(),
-                status: 'HANDED_OFF'
-            }
-        });
+        // if(assignedUser) {
+        //     await prisma.chatSession.update({
+        //         where: { id: chatSession.id },
+        //         data: {
+        //             handedOff: true,
+        //             handedOffAt: new Date(),
+        //             status: 'HANDED_OFF'
+        //         }
+        //     });
+        // }
 
         // Save system message about handoff
-        await prisma.message.create({
+       const message = await prisma.message.create({
             data: {
                 sessionId: chatSession.id,
-                content: `Chat has been transferred to ${assignedUser.name} (${assignedUser.email}). Ticket #${ticket.id} has been created.`,
+                content: assignedUser ? `Chat has been transferred to ${assignedUser.name} (${assignedUser.email}). Ticket #${ticket.id} has been created.` : `Currently, support user is not available. Our support team will assist you shortly. Ticket #${ticket.id} has been created.`,
                 sender: 'AGENT'
             }
         });
 
-        return ticket;
+        return message;
     } catch (error) {
         console.error('Error handling escalation:', error);
-        throw error;
+        return null;
     }
 }
 
