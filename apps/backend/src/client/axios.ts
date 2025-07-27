@@ -13,7 +13,6 @@ export const lyzrClient = axios.create({
 export const ragClient = axios.create({
   baseURL: 'https://rag-prod.studio.lyzr.ai',
   headers: {
-    'Content-Type': 'application/json',
     'x-api-key': process.env.LYZR_API_KEY
   }
 });

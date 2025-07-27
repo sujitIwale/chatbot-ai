@@ -147,7 +147,7 @@ const ChatBot = () => {
     <div className="min-h-screen bg-gray-50">
       <ChatbotNavigation chatbotId={chatbot.id} chatbotName={chatbot.name} />
 
-      <div className="max-w-7xl mx-auto p-6">
+      <div className="max-w-7xl mx-auto py-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <div className="space-y-6">
             <div className="bg-white rounded-2xl shadow-sm p-6">
@@ -262,33 +262,6 @@ const ChatBot = () => {
                   </span>
                 </div>
               )}
-
-              {(deployStatus === "deployed" || isDeployed) &&
-                !chatbot.hasIssues && (
-                  <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-green-800 font-medium">
-                        🎉{" "}
-                        {deployStatus === "deployed"
-                          ? "Successfully deployed!"
-                          : "Chatbot is live!"}
-                      </span>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() =>
-                          copyToClipboard(
-                            `${window.location.origin}/chat/${chatbot.id}`
-                          )
-                        }
-                        className="rounded-lg"
-                      >
-                        <Copy className="w-3 h-3 mr-1" />
-                        Copy Link
-                      </Button>
-                    </div>
-                  </div>
-                )}
 
               {deployStatus === "error" && (
                 <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl">

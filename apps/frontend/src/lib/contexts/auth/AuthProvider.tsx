@@ -24,7 +24,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
         console.log("fetching user");
         const response = await userApi.getUser();
-        setUser(response.data);
+        setUser(response);
         setIsAuthenticated(true);
       } catch (error) {
         setUser(null);

@@ -86,8 +86,6 @@ export const createChatbot = async (req: Request, res: Response) => {
         data: {
           lyzrAgentId: agentId,
           lyzrRagId: ragId,
-          deployed: true,
-          deployedAt: new Date(),
           knowledgeBaseStatus,
         },
       });

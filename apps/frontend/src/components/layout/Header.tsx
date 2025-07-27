@@ -73,18 +73,8 @@ const Header = () => {
                 {user?.name || user?.email || "User"}
               </p>
               <p className="text-xs text-gray-500">
-                {user?.email || "user@example.com"}
+                {user?.email || "user@example.cdfaom"}
               </p>
-            </div>
-
-            {/* User Avatar */}
-            <div className="flex items-center">
-              <button className="flex items-center space-x-2 rounded-full bg-gray-100 p-1 pr-3 hover:bg-gray-200 transition-colors">
-                <div className="h-8 w-8 rounded-full bg-blue-600 flex items-center justify-center">
-                  <User className="h-4 w-4 text-white" />
-                </div>
-                <ChevronDown className="h-4 w-4 text-gray-500" />
-              </button>
             </div>
 
             <Button
@@ -94,7 +84,7 @@ const Header = () => {
               className="flex items-center space-x-2 text-gray-700 hover:text-gray-900"
             >
               <LogOut className="h-4 w-4" />
-              <span className="hidden sm:inline">Logout</span>
+              Logout
             </Button>
           </div>
         </div>
