@@ -2,7 +2,7 @@
   'use strict';
   
   const defaultConfig = {
-    apiBaseUrl: 'http://localhost:3001',
+    apiBaseUrl: 'https://chatbot-ai-1n7x.onrender.com',
     position: 'bottom-right',
     primaryColor: '#3B82F6',
     chatbotName: 'AI Assistant',
