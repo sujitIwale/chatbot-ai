@@ -20,50 +20,19 @@ interface ChatWidgetProps {
   chatbotName: string;
   chatbotId: string;
   initialMessage?: string;
-  onSessionChange?: (sessionId: string) => void;
 }
 
 const ChatWidget: React.FC<ChatWidgetProps> = ({
   chatbotName,
   chatbotId,
   initialMessage = "Hello! I'm your AI assistant. How can I help you today?",
-  onSessionChange,
 }) => {
-  // Helper function to get localStorage key
-  const getStorageKey = (chatbotId: string) => `chatbot_session_${chatbotId}`;
-
-  // Helper function to get or create sessionId
-  const getOrCreateSessionId = (chatbotId: string) => {
-    const storageKey = getStorageKey(chatbotId);
-    const existingSessionId = localStorage.getItem(storageKey);
-
-    if (existingSessionId) {
-      console.log("Resuming existing session:", existingSessionId);
-      return existingSessionId;
-    } else {
-      const newSessionId = chatbotApi.generateSessionId();
-      localStorage.setItem(storageKey, newSessionId);
-      console.log("Created new session:", newSessionId);
-      return newSessionId;
-    }
-  };
-
+  const sessionId = `admin_${chatbotId}`;
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputMessage, setInputMessage] = useState("");
   const [sendingMessage, setSendingMessage] = useState(false);
-  const [sessionId] = useState(() => getOrCreateSessionId(chatbotId));
-  const [isEscalated, setIsEscalated] = useState(false);
-  const [assignedAgent, setAssignedAgent] = useState<any>(null);
   const [isInitialized, setIsInitialized] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (onSessionChange) {
-      onSessionChange(sessionId);
-    }
-    // Update localStorage whenever sessionId changes
-    localStorage.setItem(getStorageKey(chatbotId), sessionId);
-  }, [sessionId, onSessionChange, chatbotId]);
 
   useEffect(() => {
     loadChatHistory();
@@ -82,11 +51,9 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({
       const history = await chatbotApi.getChatHistory(sessionId);
 
       if (history.length > 0) {
-        // Load existing conversation
         setMessages(history);
         console.log("Loaded chat history:", history.length, "messages");
       } else {
-        // No history found, show initial message for new conversation
         const initialWelcomeMessage: ChatMessage = {
           id: "welcome_1",
           content: initialMessage,
@@ -96,25 +63,8 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({
         setMessages([initialWelcomeMessage]);
         console.log("No chat history found, showing welcome message");
       }
-
-      // Check if session is escalated
-      const sessionInfo = await chatbotApi.getSessionInfo(sessionId);
-      if (sessionInfo.handedOff && sessionInfo.tickets.length > 0) {
-        setIsEscalated(true);
-        const activeTicket = sessionInfo.tickets.find(
-          (ticket: any) => ticket.assignedUser
-        );
-        if (activeTicket) {
-          setAssignedAgent(activeTicket.assignedUser);
-        }
-        console.log(
-          "Session is escalated to:",
-          assignedAgent?.name || "Support Team"
-        );
-      }
     } catch (error) {
       console.error("Error loading chat history:", error);
-      // Show initial message on error
       const initialWelcomeMessage: ChatMessage = {
         id: "welcome_1",
         content: initialMessage,
@@ -135,7 +85,6 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({
     setInputMessage("");
     setSendingMessage(true);
 
-    // Add user message to UI immediately
     const tempUserMessage: ChatMessage = {
       id: `temp_${Date.now()}`,
       content: userMessageContent,
@@ -151,12 +100,10 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({
         userId: "anonymous",
       });
 
-      // Remove temp message and add real messages
       setMessages((prev) =>
         prev.filter((msg) => msg.id !== tempUserMessage.id)
       );
 
-      // Add agent response
       const agentMessage: ChatMessage = {
         id: `agent_${Date.now()}`,
         content: response.response,
@@ -165,33 +112,12 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({
       };
 
       setMessages((prev) => [...prev, tempUserMessage, agentMessage]);
-
-      // Handle escalation
-      if (response.escalated) {
-        setIsEscalated(true);
-        if (response.assignedTo) {
-          setAssignedAgent(response.assignedTo);
-        }
-
-        // Add system message about escalation
-        const systemMessage: ChatMessage = {
-          id: `system_${Date.now()}`,
-          content:
-            response.message ||
-            "Your query has been escalated to our support team.",
-          sender: "AGENT",
-          createdAt: new Date().toISOString(),
-        };
-        setMessages((prev) => [...prev, systemMessage]);
-      }
     } catch (error) {
       console.error("Error sending message:", error);
-      // Remove temp message on error
       setMessages((prev) =>
         prev.filter((msg) => msg.id !== tempUserMessage.id)
       );
 
-      // Add error message
       const errorMessage: ChatMessage = {
         id: `error_${Date.now()}`,
         content: "Sorry, I couldn't send your message. Please try again.",
@@ -207,35 +133,22 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({
   return (
     <div className="w-full">
       <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
-        {/* Modern Chat Header */}
-        <div
-          className={`p-6 ${
-            isEscalated
-              ? "bg-gradient-to-r from-green-600 to-emerald-600"
-              : "bg-gradient-to-r from-blue-600 to-purple-600"
-          }`}
-        >
+        <div className="p-6 bg-gradient-to-r from-blue-600 to-purple-600">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
                 <span className="text-white font-semibold text-lg">
-                  {isEscalated
-                    ? assignedAgent?.name?.charAt(0) || "S"
-                    : chatbotName.charAt(0)}
+                  {chatbotName.charAt(0)}
                 </span>
               </div>
               <div>
                 <h2 className="text-xl font-semibold text-white">
-                  {isEscalated
-                    ? assignedAgent?.name || "Support Agent"
-                    : chatbotName}
+                  {chatbotName}
                 </h2>
                 <div className="flex items-center space-x-2">
                   <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
                   <span className="text-blue-100 text-sm">
-                    {isEscalated
-                      ? "Connected to Support • Live Chat"
-                      : "Online • AI Assistant"}
+                    Online • AI Assistant
                   </span>
                 </div>
               </div>
@@ -318,11 +231,7 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({
               <Input
                 value={inputMessage}
                 onChange={(e) => setInputMessage(e.target.value)}
-                placeholder={
-                  isEscalated
-                    ? `Message ${assignedAgent?.name || "support agent"}...`
-                    : "Ask me anything..."
-                }
+                placeholder="Ask me anything..."
                 className="w-full pr-4 py-3 rounded-xl border-gray-200 focus:border-blue-500 focus:ring-blue-500 text-sm"
                 disabled={sendingMessage}
                 onKeyPress={(e) => {
@@ -345,19 +254,8 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({
               )}
             </Button>
           </form>
-          {isEscalated && assignedAgent && (
-            <div className="mt-2 text-xs text-gray-600 text-center">
-              Your conversation has been transferred to {assignedAgent.name} (
-              {assignedAgent.email})
-            </div>
-          )}
           <p className="text-xs text-gray-400 mt-2 text-center">
-            Press Enter to send •{" "}
-            {isEscalated ? "Live Support" : "Powered by AI"}
-            {messages.length > 1 &&
-              localStorage.getItem(getStorageKey(chatbotId)) && (
-                <span className="ml-2">• 💾 Session saved</span>
-              )}
+            Press Enter to send • "Powered by AI"
           </p>
         </div>
       </div>

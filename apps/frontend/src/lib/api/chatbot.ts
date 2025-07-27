@@ -5,12 +5,10 @@ export const chatbotApi = {
     const response = await client.get("/api/chatbot/");
     return response.data;
   },
-
   getChatbot: async (id: string) => {
     const response = await client.get(`/api/chatbot/${id}`);
     return response.data;
   },
-  
   createChatbot: async (data: { 
     name: string; 
     description?: string;
@@ -65,7 +63,6 @@ export const chatbotApi = {
     return response.data;
   },
 
-  // Chat API methods
   sendMessage: async (chatbotId: string, data: {
     message: string;
     sessionId: string;
@@ -83,19 +80,6 @@ export const chatbotApi = {
   getSessionInfo: async (sessionId: string) => {
     const response = await client.get(`/api/chatbot/chat/session/${sessionId}/info`);
     return response.data;
-  },
-
-  sendSupportMessage: async (sessionId: string, data: {
-    message: string;
-    supportUserId: string;
-  }) => {
-    const response = await client.post(`/api/chatbot/chat/session/${sessionId}/support-message`, data);
-    return response.data;
-  },
-
-  // Utility method to generate session ID
-  generateSessionId: () => {
-    return `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   },
 
   // Fix agent initialization issues

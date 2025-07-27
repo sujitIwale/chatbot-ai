@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response, Router } from "express";
-import { getChatHistory, getSessionInfo, sendMessage } from "../controllers/chat";
+import { getChatHistory, sendMessage } from "../controllers/chat";
 import prisma from "../lib/db";
 
 const chatRouter: Router = Router();

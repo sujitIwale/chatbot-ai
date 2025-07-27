@@ -112,79 +112,7 @@ export const getChatHistory = async (req: Request, res: Response) => {
     }
 };
 
-export const getSessionInfo = async (req: Request, res: Response) => {
-    const { sessionId } = req.params;
-    
-    try {
-        const session = await prisma.chatSession.findUnique({
-            where: { id: sessionId },
-            include: {
-                tickets: {
-                    include: {
-                        assignedUser: {
-                            select: {
-                                id: true,
-                                name: true,
-                                email: true
-                            }
-                        }
-                    }
-                }
-            }
-        });
 
-        if (!session) {
-            return res.status(404).json({ error: "Session not found" });
-        }
-
-        res.status(200).json(session);
-    } catch (error) {
-        console.error('Error getting session info:', error);
-        res.status(500).json({ error: "Failed to get session info" });
-    }
-};
-
-export const sendSupportMessage = async (req: Request, res: Response) => {
-    const { sessionId } = req.params;
-    const { message, supportUserId } = req.body;
-    
-    try {
-        // Verify support user
-        const supportUser = await prisma.customerSupportUser.findUnique({
-            where: { id: supportUserId }
-        });
-
-        if (!supportUser) {
-            return res.status(404).json({ error: "Support user not found" });
-        }
-
-        // Save support message
-        const savedMessage = await prisma.message.create({
-            data: {
-                sessionId,
-                content: message,
-                sender: 'SUPPORT',
-                senderId: supportUserId
-            },
-            include: {
-                supportAgent: {
-                    select: {
-                        id: true,
-                        name: true,
-                        email: true
-                    }
-                }
-            }
-        });
-
-        res.status(200).json(savedMessage);
-    } catch (error) {
-        console.error('Error sending support message:', error);
-        res.status(500).json({ error: "Failed to send support message" });
-    }
-};
-
-// Helper function to handle escalation to human support
 async function handleEscalationToHuman(chatSession: any, originalMessage: string):Promise<Message | null> {
     try {
         // Find support user with least tickets
@@ -200,18 +128,6 @@ async function handleEscalationToHuman(chatSession: any, originalMessage: string
             }
         });
 
-        // if(assignedUser) {
-        //     await prisma.chatSession.update({
-        //         where: { id: chatSession.id },
-        //         data: {
-        //             handedOff: true,
-        //             handedOffAt: new Date(),
-        //             status: 'HANDED_OFF'
-        //         }
-        //     });
-        // }
-
-        // Save system message about handoff
        const message = await prisma.message.create({
             data: {
                 sessionId: chatSession.id,

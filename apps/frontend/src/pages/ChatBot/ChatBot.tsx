@@ -45,13 +45,12 @@ const ChatBot = () => {
   const [deployStatus, setDeployStatus] = useState<
     "idle" | "deploying" | "deployed" | "error"
   >("idle");
-  const [currentSessionId, setCurrentSessionId] = useState<string>("");
 
   useEffect(() => {
     if (chatbotId) {
       fetchChatbot();
     } else {
-      // navigate("/dashboard");
+      navigate("/dashboard");
     }
   }, [chatbotId, navigate]);
 
@@ -81,11 +80,9 @@ const ChatBot = () => {
         context: chatbot.context,
       });
 
-      // Refresh chatbot data to get updated deployment status
       await fetchChatbot();
       setDeployStatus("deployed");
 
-      // Reset status after showing success message
       setTimeout(() => setDeployStatus("idle"), 3000);
     } catch (err) {
       console.error("Error deploying chatbot:", err);
@@ -152,9 +149,7 @@ const ChatBot = () => {
 
       <div className="max-w-7xl mx-auto p-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Left Side - Chatbot Details */}
           <div className="space-y-6">
-            {/* Chatbot Info Card */}
             <div className="bg-white rounded-2xl shadow-sm p-6">
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center space-x-4">
@@ -221,7 +216,6 @@ const ChatBot = () => {
                 </Button>
               </div>
 
-              {/* Issues Detection and Fix Section */}
               {chatbot.hasIssues && !isDeployed && (
                 <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-xl">
                   <div className="flex items-center justify-between">
@@ -249,7 +243,6 @@ const ChatBot = () => {
                 </div>
               )}
 
-              {/* Status Messages */}
               {deployStatus === "deployed" && chatbot.hasIssues && (
                 <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl">
                   <span className="text-sm text-green-800 font-medium">
@@ -306,7 +299,6 @@ const ChatBot = () => {
               )}
 
               <div className="space-y-6">
-                {/* Description */}
                 {chatbot.description && (
                   <div>
                     <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center">
@@ -328,7 +320,6 @@ const ChatBot = () => {
                   </div>
                 )}
 
-                {/* Instructions */}
                 <div>
                   <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center">
                     <Settings className="w-4 h-4 mr-2 text-purple-500" />
@@ -348,7 +339,6 @@ const ChatBot = () => {
                   </div>
                 </div>
 
-                {/* Context */}
                 {chatbot.context && (
                   <div>
                     <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center">
@@ -392,14 +382,9 @@ const ChatBot = () => {
             </div>
           </div>
 
-          {/* Right Side - Chat Widget */}
           <div>
             {chatbot.deployed && !chatbot.hasIssues ? (
-              <ChatWidget
-                chatbotName={chatbot.name}
-                chatbotId={chatbot.id}
-                onSessionChange={setCurrentSessionId}
-              />
+              <ChatWidget chatbotName={chatbot.name} chatbotId={chatbot.id} />
             ) : (
               <div className="bg-white rounded-2xl shadow-sm p-6">
                 <div className="h-96 flex items-center justify-center">
@@ -436,13 +421,6 @@ const ChatBot = () => {
                     </Button>
                   </div>
                 </div>
-              </div>
-            )}
-            {currentSessionId && (
-              <div className="mt-4 text-center">
-                <p className="text-xs text-gray-500">
-                  Session ID: {currentSessionId}
-                </p>
               </div>
             )}
           </div>
