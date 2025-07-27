@@ -8,6 +8,37 @@ const Home: React.FC = () => {
 
   useEffect(() => {
     setAuthenticated(isAuthenticated());
+
+    const loadChatbotScript = () => {
+      const script = document.createElement("script");
+      script.id = "chatbot-embed-script";
+      script.src = "/embed.js";
+      script.setAttribute(
+        "data-chatbot-id",
+        "9c42d782-ac9b-49d0-9f4f-840db4ed0a9b"
+      );
+      script.setAttribute("data-chatbot-name", "Lyzr chatbot support");
+      script.setAttribute("data-primary-color", "#8B5CF6");
+      script.setAttribute(
+        "data-initial-message",
+        "Hi! I'm a demo of our AI assistant. Try asking me anything about our platform or customer support!"
+      );
+
+      document.body.appendChild(script);
+    };
+
+    loadChatbotScript();
+
+    return () => {
+      const script = document.getElementById("chatbot-embed-script");
+      if (script) {
+        script.remove();
+      }
+      const widget = document.querySelector(".chat-widget-container");
+      if (widget) {
+        widget.remove();
+      }
+    };
   }, []);
 
   const handleLogout = () => {
@@ -86,6 +117,9 @@ const Home: React.FC = () => {
               <span className="inline-flex items-center px-3 py-1 rounded-full bg-blue-100 text-blue-800">
                 👥 Smart agent assignment
               </span>
+              <span className="inline-flex items-center px-3 py-1 rounded-full bg-yellow-100 text-yellow-800">
+                💬 Try our live demo (bottom-right!)
+              </span>
             </div>
 
             <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
@@ -116,6 +150,25 @@ const Home: React.FC = () => {
               </div>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Create Chatbot Flow Image */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="text-center mb-8">
+          <h2 className="text-3xl font-bold text-gray-900">How it works</h2>
+          <p className="mt-4 text-lg text-gray-600">
+            Create your AI chatbot in three simple steps
+          </p>
+        </div>
+        <div className="flex justify-center">
+          <img
+            src="/create.png"
+            alt="Create Chatbot Flow"
+            className="w-full max-w-4xl mx-auto"
+            style={{ maxHeight: "500px", objectFit: "contain" }}
+            loading="lazy"
+          />
         </div>
       </div>
 
