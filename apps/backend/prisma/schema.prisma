@@ -92,7 +92,7 @@ model Message {
   sessionId String
   content   String
   sender    MessageSender
-  senderId  String? // Customer Support User ID if sender is SUPPORT
+  senderId  String?
   createdAt DateTime      @default(now())
 
   session      ChatSession          @relation(fields: [sessionId], references: [id], onDelete: Cascade)

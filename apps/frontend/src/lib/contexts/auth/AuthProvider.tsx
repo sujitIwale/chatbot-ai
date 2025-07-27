@@ -50,6 +50,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const logout = async () => {
     await authApi.logout().finally(() => {
       setIsAuthenticated(false);
+      tryLogout();
     });
   };
 
