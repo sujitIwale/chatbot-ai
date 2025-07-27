@@ -104,7 +104,7 @@ const TicketsPanel: React.FC<TicketsPanelProps> = ({ chatbotId }) => {
       <div className="max-w-6xl mx-auto p-6">
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
-            <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-blue-600" />
+            <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" />
             <p className="text-gray-600">Loading tickets...</p>
           </div>
         </div>

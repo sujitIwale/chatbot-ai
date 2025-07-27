@@ -28,12 +28,14 @@ const Header = () => {
     <header className="bg-white border-b border-gray-200 px-6 py-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-8">
-          <div className="flex items-center space-x-2">
-            <Bot className="h-8 w-8 text-blue-600" />
-            <h1 className="text-xl font-semibold text-gray-900">
-              Lyzr Chatbot
-            </h1>
-          </div>
+          <Link to="/">
+            <div className="flex items-center space-x-2">
+              <Bot className="h-8 w-8 text-blue-600" />
+              <h1 className="text-xl font-semibold text-gray-900">
+                Lyzr Chatbot
+              </h1>
+            </div>
+          </Link>
 
           <nav className="hidden md:flex items-center space-x-1">
             {navigationItems.map((item) => {
