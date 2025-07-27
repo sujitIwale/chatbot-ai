@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { createChatbot, getChatbot, deployChatbot, createCustomerSupportUser, getCustomerSupportUsers, getChatbots } from "../controllers/chatbot";
+import { createChatbot, getChatbot, deployChatbot, createCustomerSupportUser, getCustomerSupportUsers, getChatbots, fixAgent } from "../controllers/chatbot";
 import { authorization } from "../middleware/auth";
 import { createTicket, getTickets, reassignTicketHandler, getTicketStats } from "../controllers/tickets";
 import { sendMessage, getChatHistory, getSessionInfo, sendSupportMessage } from "../controllers/chat";
@@ -8,6 +8,7 @@ const chatbotRouter: Router = Router();
 
 chatbotRouter.get("/", getChatbots);
 chatbotRouter.post("/create", createChatbot);
+chatbotRouter.post('/:chatbotId/fix-agent', authorization, fixAgent);
 
 // chatbot
 chatbotRouter.get("/:chatbotId", authorization, getChatbot);

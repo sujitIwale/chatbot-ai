@@ -127,7 +127,7 @@ const lyzrApis = {
     let tempFilePath: string | null = null;
 
     try {
-      let fileName = `temp_${Date.now()}_${chatbot.name}_context.txt`;
+      let fileName = `temp_${Date.now()}_context.txt`;
       // Create a temporary file
       const tempDir = os.tmpdir();
       tempFilePath = path.join(tempDir, fileName);

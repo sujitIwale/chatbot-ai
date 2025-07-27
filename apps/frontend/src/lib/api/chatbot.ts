@@ -103,5 +103,11 @@ export const chatbotApi = {
   // Utility method to generate session ID
   generateSessionId: () => {
     return `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  },
+
+  // Fix agent initialization issues
+  fixAgent: async (chatbotId: string) => {
+    const response = await client.post(`/api/chatbot/${chatbotId}/fix-agent`);
+    return response.data;
   }
 };

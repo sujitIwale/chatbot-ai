@@ -3,7 +3,6 @@ import prisma from "../lib/db";
 import { customerSupportAgent } from "../client/lyzr";
 
 export const getChatbots = async (req: Request, res: Response) => {
-
   try {
     const chatbots = await prisma.chatbot.findMany({
       where: { ownerId: req.user?.id },
@@ -39,7 +38,21 @@ export const getChatbot = async (req: Request, res: Response) => {
       return res.status(404).json({ error: "Chatbot not found" });
     }
 
-    res.json(chatbot);
+    const issues = {
+      agentNotInitialized: !chatbot.lyzrAgentId,
+      ragNotPresent: !chatbot.lyzrRagId,
+      knowledgeBaseIssue: chatbot.knowledgeBaseStatus !== 'CREATED'
+    };
+    
+    const hasIssues = issues.agentNotInitialized || issues.ragNotPresent || issues.knowledgeBaseIssue;
+
+    res.json({
+      ...chatbot,
+      agentInitialized: !!chatbot.lyzrAgentId,
+      ragInitialized: !!chatbot.lyzrRagId,
+      hasIssues,
+      issues
+    });
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch chatbot" });
   }
@@ -64,9 +77,10 @@ export const createChatbot = async (req: Request, res: Response) => {
       },
     });
     try {
-      const { agentId, ragId,knowledgeBaseStatus } = await customerSupportAgent.initialize(chatbot);
+      const { agentId, ragId, knowledgeBaseStatus } =
+        await customerSupportAgent.initialize(chatbot);
 
-      console.log({agentId, ragId})
+      console.log({ agentId, ragId });
       const updatedChatbot = await prisma.chatbot.update({
         where: { id: chatbot.id },
         data: {
@@ -74,29 +88,67 @@ export const createChatbot = async (req: Request, res: Response) => {
           lyzrRagId: ragId,
           deployed: true,
           deployedAt: new Date(),
-          knowledgeBaseStatus
-        }
+          knowledgeBaseStatus,
+        },
       });
 
       res.status(201).json({
         ...updatedChatbot,
         agentInitialized: true,
-        message: "Chatbot created and AI agent initialized successfully"
+        message: "Chatbot created and AI agent initialized successfully",
       });
     } catch (agentError) {
-      console.error('Error initializing Lyzr agent:', agentError);
-      
+      console.error("Error initializing Lyzr agent:", agentError);
+
       // Return the chatbot even if agent initialization fails
       res.status(201).json({
         ...chatbot,
         agentInitialized: false,
-        message: "Chatbot created but AI agent initialization failed. You can retry deployment later.",
-        error: "Agent initialization failed"
+        message:
+          "Chatbot created but AI agent initialization failed. You can retry deployment later.",
+        error: "Agent initialization failed",
       });
     }
   } catch (error) {
-    console.error('Error creating chatbot:', error);
+    console.error("Error creating chatbot:", error);
     res.status(500).json({ error: "Failed to create chatbot" });
+  }
+};
+
+export const fixAgent = async (req: Request, res: Response) => {
+  const { chatbotId } = req.params;
+  try {
+    const chatbot = await prisma.chatbot.findUnique({
+      where: {
+        id: chatbotId,
+        ownerId: req.user?.id,
+      },
+    });
+
+    if (!chatbot) {
+      return res.status(404).json({ error: "Chatbot not found" });
+    }
+
+    const { agentId, ragId, knowledgeBaseStatus } =
+      await customerSupportAgent.initialize(chatbot);
+
+    const updatedChatbot = await prisma.chatbot.update({
+      where: { id: chatbotId },
+      data: {
+        lyzrAgentId: agentId,
+        lyzrRagId: ragId,
+        knowledgeBaseStatus,
+      },
+    });
+
+    res.status(200).json({
+      ...updatedChatbot,
+      agentInitialized: true,
+      message: "Chatbot agent fixed successfully",
+    });
+  } catch (error) {
+    console.error("Error fixing chatbot agent:", error);
+    res.status(500).json({ error: "Failed to fix chatbot agent" });
   }
 };
 
@@ -120,43 +172,19 @@ export const deployChatbot = async (req: Request, res: Response) => {
       },
     });
 
-    // Initialize or update Lyzr agent
-    // try {
-    //   const { agentId, ragId } = await lyzrManagerAgent.initialize({
-    //     id: chatbot.id,
-    //     name: chatbot.name,
-    //     description: chatbot.description || undefined,
-    //     instructions: chatbot.instructions,
-    //     context: chatbot.context || undefined
-    //   });
-      
-    //   // Update chatbot with Lyzr IDs
-    //   await prisma.chatbot.update({
-    //     where: { id: chatbotId },
-    //     data: {
-    //       lyzrAgentId: agentId,
-    //       lyzrRagId: ragId
-    //     }
-    //   });
-
-    //   res.json({ 
-    //     message: "Chatbot deployed and AI agent updated successfully",
-    //     agentInitialized: true
-    //   });
-    // } catch (agentError) {
-    //   console.error('Error updating Lyzr agent:', agentError);
-    //   res.json({ 
-    //     message: "Chatbot deployed but AI agent update failed",
-    //     agentInitialized: false,
-    //     error: "Agent update failed"
-    //   });
-    // }
+    res.status(200).json({
+      ...chatbot,
+      message: "Chatbot deployed successfully",
+    });
   } catch (error) {
     res.status(500).json({ error: "Failed to deploy chatbot" });
   }
 };
 
-export const createCustomerSupportUser = async (req: Request, res: Response) => {
+export const createCustomerSupportUser = async (
+  req: Request,
+  res: Response
+) => {
   const { name, email } = req.body;
   const { chatbotId } = req.params;
 
@@ -165,8 +193,8 @@ export const createCustomerSupportUser = async (req: Request, res: Response) => 
       data: {
         name,
         email,
-        chatbotId
-      }
+        chatbotId,
+      },
     });
 
     res.status(201).json(customerSupportUser);
@@ -187,18 +215,18 @@ export const getCustomerSupportUsers = async (req: Request, res: Response) => {
         email: true,
         _count: {
           select: {
-            assignedTickets: true
-          }
-        }
-      }
+            assignedTickets: true,
+          },
+        },
+      },
     });
 
     // Transform the response to include ticketCount at the top level
-    const usersWithTicketCount = customerSupportUsers.map(user => ({
+    const usersWithTicketCount = customerSupportUsers.map((user) => ({
       id: user.id,
       name: user.name,
       email: user.email,
-      ticketCount: user._count.assignedTickets
+      ticketCount: user._count.assignedTickets,
     }));
 
     res.status(200).json(usersWithTicketCount);
@@ -206,4 +234,3 @@ export const getCustomerSupportUsers = async (req: Request, res: Response) => {
     res.status(500).json({ error: "Failed to get customer support users" });
   }
 };
-
