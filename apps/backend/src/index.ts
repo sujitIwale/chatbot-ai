@@ -16,6 +16,16 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+const publicCorsConfig = {
+  origin: true,
+  credentials: true
+};
+
+const protectedCorsConfig = {
+  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  credentials: true
+};
+
 // Middleware
 // app.use(helmet());
 app.use(morgan('combined'));
@@ -38,31 +48,16 @@ app.get('/', (req: Request, res: Response) => {
 });
 
 // PUBLIC ROUTES FIRST - Chat widget (allow all domains)
-app.use('/api/chat', cors({
-  origin: true, // Allow all origins for chat widget
-  credentials: true
-}), chatRouter);
+app.use('/api/chat', cors(publicCorsConfig), chatRouter);
 
 // PROTECTED ROUTES - Apply restricted CORS
-app.use('/auth', cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
-  credentials: true
-}), authRouter);
+app.use('/auth', cors(protectedCorsConfig), authRouter);
 
-app.use('/api/user', cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
-  credentials: true
-}), authenticateJWT, userRouter);
+app.use('/api/user', cors(protectedCorsConfig), authenticateJWT, userRouter);
 
-app.use('/api/chatbot', cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
-  credentials: true
-}), authenticateJWT, chatbotRouter);
+app.use('/api/chatbot', cors(protectedCorsConfig), authenticateJWT, chatbotRouter);
 
-app.use('/api/agent-tool', cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
-  credentials: true
-}), agentToolRouter);
+app.use('/api/agent-tool', cors(protectedCorsConfig), agentToolRouter);
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
