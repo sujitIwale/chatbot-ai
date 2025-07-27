@@ -9,7 +9,6 @@ import {
   Calendar,
   User,
   MessageSquare,
-  Copy,
   Settings,
   CheckCircle,
 } from "lucide-react";
@@ -27,7 +26,6 @@ interface IChatBot {
   deployedAt?: string;
   createdAt: string;
   updatedAt: string;
-  agentInitialized?: boolean;
   hasIssues?: boolean;
   owner: {
     id: string;
@@ -95,20 +93,11 @@ const ChatBot = () => {
     if (!chatbot || !chatbot.hasIssues) return;
 
     try {
-      setDeployStatus("deploying");
       await chatbotApi.fixAgent(chatbot.id);
       await fetchChatbot();
-      setDeployStatus("deployed");
-      setTimeout(() => setDeployStatus("idle"), 3000);
     } catch (err) {
       console.error("Error fixing chatbot agent:", err);
-      setDeployStatus("error");
-      setTimeout(() => setDeployStatus("idle"), 3000);
     }
-  };
-
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
   };
 
   if (loading) {
@@ -216,7 +205,7 @@ const ChatBot = () => {
                 </Button>
               </div>
 
-              {chatbot.hasIssues && !isDeployed && (
+              {chatbot.hasIssues && (
                 <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-xl">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center">
@@ -227,23 +216,15 @@ const ChatBot = () => {
                     </div>
                     <Button
                       onClick={handleFixAgent}
-                      disabled={deployStatus !== "idle"}
                       className="bg-amber-600 hover:bg-amber-700 text-white rounded-lg px-4 py-2"
                     >
-                      {deployStatus === "deploying" ? (
-                        <>
-                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                          Fixing...
-                        </>
-                      ) : (
-                        "Fix Issues"
-                      )}
+                      Fix Issues
                     </Button>
                   </div>
                 </div>
               )}
 
-              {deployStatus === "deployed" && chatbot.hasIssues && (
+              {chatbot.hasIssues && (
                 <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl">
                   <span className="text-sm text-green-800 font-medium">
                     ✅ Issues fixed successfully! Your chatbot is now ready.
@@ -356,7 +337,7 @@ const ChatBot = () => {
           </div>
 
           <div>
-            {chatbot.deployed && !chatbot.hasIssues ? (
+            {!chatbot.hasIssues ? (
               <ChatWidget chatbotName={chatbot.name} chatbotId={chatbot.id} />
             ) : (
               <div className="bg-white rounded-2xl shadow-sm p-6">
@@ -384,13 +365,8 @@ const ChatBot = () => {
                         chatbot.hasIssues ? handleFixAgent : fetchChatbot
                       }
                       className="bg-blue-600 hover:bg-blue-700"
-                      disabled={deployStatus === "deploying"}
                     >
-                      {deployStatus === "deploying"
-                        ? "Working..."
-                        : chatbot.hasIssues
-                        ? "Fix Issues"
-                        : "Check Status"}
+                      {chatbot.hasIssues ? "Fix Issues" : "Check Status"}
                     </Button>
                   </div>
                 </div>

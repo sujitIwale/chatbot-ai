@@ -36,6 +36,7 @@ model Chatbot {
   updatedAt            DateTime              @updatedAt
   lyzrAgentId          String?
   lyzrRagId            String?
+  useKnowledgeBase     Boolean               @default(false)
   knowledgeBaseStatus  KnowledgeBaseStatus   @default(NOT_CREATED)
   owner                User                  @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   customerSupportUsers CustomerSupportUser[]

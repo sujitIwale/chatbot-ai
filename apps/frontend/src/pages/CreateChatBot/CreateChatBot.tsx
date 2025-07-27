@@ -14,16 +14,19 @@ const CreateChatBot = () => {
     description: "",
     agentInstructions: "",
     context: "",
+    useKnowledgeBase: false,
   });
   const [isLoading, setIsLoading] = useState(false);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
-    const { name, value } = e.target;
+    const { name, value, type } = e.target;
+    const checked = (e.target as HTMLInputElement).checked;
+
     setFormData((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: type === "checkbox" ? checked : value,
     }));
   };
 
@@ -50,6 +53,7 @@ const CreateChatBot = () => {
         description: formData.description || undefined,
         instructions: formData.agentInstructions,
         context: formData.context || undefined,
+        useKnowledgeBase: formData.useKnowledgeBase,
       });
 
       if (response.id) {
@@ -179,6 +183,36 @@ const CreateChatBot = () => {
                   <p className="mt-1 text-sm text-gray-500">
                     Background information and knowledge base for your AI agent
                   </p>
+
+                  {/* Knowledge Base Checkbox */}
+                  <div className="mt-3 flex items-start space-x-3">
+                    <input
+                      id="useKnowledgeBase"
+                      name="useKnowledgeBase"
+                      type="checkbox"
+                      checked={formData.useKnowledgeBase}
+                      onChange={handleInputChange}
+                      disabled={isLoading}
+                      className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    />
+                    <div className="flex-1">
+                      <label
+                        htmlFor="useKnowledgeBase"
+                        className="block text-sm font-medium text-gray-700"
+                      >
+                        Create Knowledge Base
+                      </label>
+                      <p className="text-sm text-gray-500">
+                        Enable this to create a knowledge base from the context
+                        information.
+                        <span className="text-amber-600 font-medium">
+                          {" "}
+                          Note: I am not sure if knowledge base is getting
+                          connected properly.
+                        </span>
+                      </p>
+                    </div>
+                  </div>
                 </div>
 
                 <div className="flex justify-end space-x-4 pt-6">
@@ -191,6 +225,7 @@ const CreateChatBot = () => {
                         description: "",
                         agentInstructions: "",
                         context: "",
+                        useKnowledgeBase: false,
                       })
                     }
                     disabled={isLoading}

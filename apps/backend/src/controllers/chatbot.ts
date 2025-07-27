@@ -38,20 +38,11 @@ export const getChatbot = async (req: Request, res: Response) => {
       return res.status(404).json({ error: "Chatbot not found" });
     }
 
-    const issues = {
-      agentNotInitialized: !chatbot.lyzrAgentId,
-      ragNotPresent: !chatbot.lyzrRagId,
-      knowledgeBaseIssue: chatbot.knowledgeBaseStatus !== 'CREATED'
-    };
-    
-    const hasIssues = issues.agentNotInitialized || issues.ragNotPresent || issues.knowledgeBaseIssue;
-
     res.json({
       ...chatbot,
       agentInitialized: !!chatbot.lyzrAgentId,
       ragInitialized: !!chatbot.lyzrRagId,
-      hasIssues,
-      issues
+      hasIssues: !chatbot.lyzrAgentId
     });
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch chatbot" });
@@ -59,7 +50,7 @@ export const getChatbot = async (req: Request, res: Response) => {
 };
 
 export const createChatbot = async (req: Request, res: Response) => {
-  const { name, description, instructions, context } = req.body;
+  const { name, description, instructions, context , useKnowledgeBase} = req.body;
 
   try {
     // Create the chatbot first
@@ -69,6 +60,7 @@ export const createChatbot = async (req: Request, res: Response) => {
         description,
         instructions,
         context,
+        useKnowledgeBase,
         owner: {
           connect: {
             id: req.user?.id,

@@ -191,26 +191,32 @@ const customerSupportAgent = {
     let ragId = chatbot.lyzrRagId;
     let knowledgeBaseStatus: Chatbot["knowledgeBaseStatus"] =
       chatbot.knowledgeBaseStatus;
+    let extraInstructions = "";
 
-    try {
-      if (!ragId) {
-        const ragResponse = await lyzrApis.createRAGConfiguration(chatbot);
-        console.log("rag is created", { ragResponse });
-        ragId = ragResponse.id;
-        console.log("RAG configuration created:", ragResponse);
-      }
-
-      if (ragId && chatbot.knowledgeBaseStatus === "NOT_CREATED") {
-        await lyzrApis.uploadTextTraining(chatbot,ragId);
-        knowledgeBaseStatus = "CREATED";
-      }
-
-      console.log("Context uploaded to knowledge base successfully");
-    } catch (error: any) {
-      console.error(
-        "Failed to create knowledge base, but continuing with agent creation:",
-        error
-      );
+    
+    if(chatbot.useKnowledgeBase) {
+      try {
+        if (!ragId) {
+          const ragResponse = await lyzrApis.createRAGConfiguration(chatbot);
+          console.log("rag is created", { ragResponse });
+          ragId = ragResponse.id;
+          console.log("RAG configuration created:", ragResponse);
+        }
+  
+        if (ragId && chatbot.knowledgeBaseStatus === "NOT_CREATED") {
+          await lyzrApis.uploadTextTraining(chatbot,ragId);
+          knowledgeBaseStatus = "CREATED";
+        }
+  
+        console.log("Context uploaded to knowledge base successfully");
+      } catch (error: any) {
+        console.error(
+          "Failed to create knowledge base, but continuing with agent creation:",
+          error
+        );
+      } 
+    } else {
+      extraInstructions = chatbot.context;
     }
 
     try {
@@ -226,7 +232,7 @@ const customerSupportAgent = {
         agent_role: `You are an Expert Customer Support Agent for ${chatbot.name}.`,
         agent_instructions: `${chatbot.instructions}
         ${agentInstructions}
-        `,
+        ${extraInstructions}`,
         agent_goal: `Your goal is to resolve customer queries for ${chatbot.name} and provide exceptional customer support.`,
         features: [
           {

@@ -14,6 +14,7 @@ export const chatbotApi = {
     description?: string;
     instructions: string;
     context?: string;
+    useKnowledgeBase?: boolean;
   }) => {
     const response = await client.post("/api/chatbot/create", data);
     return response.data;
