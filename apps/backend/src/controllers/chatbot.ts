@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import prisma from "../lib/db";
-import { lyzrManagerAgent } from "../client/lyzr";
+import { customerSupportAgent } from "../client/lyzr";
 
 export const getChatbots = async (req: Request, res: Response) => {
 
@@ -64,13 +64,7 @@ export const createChatbot = async (req: Request, res: Response) => {
       },
     });
     try {
-      const { agentId, ragId } = await lyzrManagerAgent.initialize({
-        id: chatbot.id,
-        name: chatbot.name,
-        description: chatbot.description || undefined,
-        instructions: chatbot.instructions,
-        context: chatbot.context
-      });
+      const { agentId, ragId,knowledgeBaseStatus } = await customerSupportAgent.initialize(chatbot);
 
       console.log({agentId, ragId})
       const updatedChatbot = await prisma.chatbot.update({
@@ -79,7 +73,8 @@ export const createChatbot = async (req: Request, res: Response) => {
           lyzrAgentId: agentId,
           lyzrRagId: ragId,
           deployed: true,
-          deployedAt: new Date()
+          deployedAt: new Date(),
+          knowledgeBaseStatus
         }
       });
 
@@ -126,36 +121,36 @@ export const deployChatbot = async (req: Request, res: Response) => {
     });
 
     // Initialize or update Lyzr agent
-    try {
-      const { agentId, ragId } = await lyzrManagerAgent.initialize({
-        id: chatbot.id,
-        name: chatbot.name,
-        description: chatbot.description || undefined,
-        instructions: chatbot.instructions,
-        context: chatbot.context || undefined
-      });
+    // try {
+    //   const { agentId, ragId } = await lyzrManagerAgent.initialize({
+    //     id: chatbot.id,
+    //     name: chatbot.name,
+    //     description: chatbot.description || undefined,
+    //     instructions: chatbot.instructions,
+    //     context: chatbot.context || undefined
+    //   });
       
-      // Update chatbot with Lyzr IDs
-      await prisma.chatbot.update({
-        where: { id: chatbotId },
-        data: {
-          lyzrAgentId: agentId,
-          lyzrRagId: ragId
-        }
-      });
+    //   // Update chatbot with Lyzr IDs
+    //   await prisma.chatbot.update({
+    //     where: { id: chatbotId },
+    //     data: {
+    //       lyzrAgentId: agentId,
+    //       lyzrRagId: ragId
+    //     }
+    //   });
 
-      res.json({ 
-        message: "Chatbot deployed and AI agent updated successfully",
-        agentInitialized: true
-      });
-    } catch (agentError) {
-      console.error('Error updating Lyzr agent:', agentError);
-      res.json({ 
-        message: "Chatbot deployed but AI agent update failed",
-        agentInitialized: false,
-        error: "Agent update failed"
-      });
-    }
+    //   res.json({ 
+    //     message: "Chatbot deployed and AI agent updated successfully",
+    //     agentInitialized: true
+    //   });
+    // } catch (agentError) {
+    //   console.error('Error updating Lyzr agent:', agentError);
+    //   res.json({ 
+    //     message: "Chatbot deployed but AI agent update failed",
+    //     agentInitialized: false,
+    //     error: "Agent update failed"
+    //   });
+    // }
   } catch (error) {
     res.status(500).json({ error: "Failed to deploy chatbot" });
   }

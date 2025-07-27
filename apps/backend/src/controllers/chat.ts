@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { lyzrManagerAgent } from "../client/lyzr";
+import { customerSupportAgent } from "../client/lyzr";
 import prisma from "../lib/db";
 import { assignTicketToSupportUser } from "../services/ticketAssignment";
 
@@ -42,35 +42,18 @@ export const sendMessage = async (req: Request, res: Response) => {
 
         // Get chatbot details
         const chatbot = chatSession.chatbot;
-        
-        // // Initialize Lyzr agent if not already done
-        // if (!chatbot.lyzrAgentId || !chatbot.lyzrEnvironmentId) {
-        //     const { environmentId, agentId } = await lyzrManagerAgent.initialize(
-        //         chatbotId,
-        //         chatbot.context || '',
-        //         chatbot.instructions,
-        //     );
-            
-        //     // Update chatbot with Lyzr IDs
-        //     await prisma.chatbot.update({
-        //         where: { id: chatbotId },
-        //         data: {
-        //             lyzrEnvironmentId: environmentId,
-        //             lyzrAgentId: agentId
-        //         }
-        //     });
-        // }
-
         if(!chatbot.lyzrAgentId){
             return res.status(400).json({ error: "Agent not initialized" });
         }
 
         // Send message to Lyzr agent
-        const agentResponse = await lyzrManagerAgent.sendMessage(
-            message,
-            sessionId,
-            userId || 'anonymous',
-            chatbot.lyzrAgentId
+        const agentResponse = await customerSupportAgent.sendMessage(
+            {
+                lyzrAgentId: chatbot.lyzrAgentId,
+                message,
+                sessionId,
+                userId: userId || 'anonymous'
+            }
         );
 
         // Save agent response

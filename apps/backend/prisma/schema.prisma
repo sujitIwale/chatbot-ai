@@ -28,7 +28,7 @@ model Chatbot {
   name                 String
   description          String?
   instructions         String
-  context              String?
+  context              String                @default("")
   ownerId              String
   deployed             Boolean               @default(false)
   deployedAt           DateTime?
@@ -36,6 +36,7 @@ model Chatbot {
   updatedAt            DateTime              @updatedAt
   lyzrAgentId          String?
   lyzrRagId            String?
+  knowledgeBaseStatus  KnowledgeBaseStatus   @default(NOT_CREATED)
   owner                User                  @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   customerSupportUsers CustomerSupportUser[]
   tickets              Ticket[]
@@ -108,4 +109,9 @@ enum MessageSender {
   USER
   AGENT
   SUPPORT
+}
+
+enum KnowledgeBaseStatus {
+  NOT_CREATED
+  CREATED
 }
