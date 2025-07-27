@@ -48,25 +48,10 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({
     }
   };
 
-  // Helper function to clear chat session (useful for starting fresh)
-  const clearChatSession = () => {
-    const storageKey = getStorageKey(chatbotId);
-    localStorage.removeItem(storageKey);
-    const newSessionId = chatbotApi.generateSessionId();
-    localStorage.setItem(storageKey, newSessionId);
-    setSessionId(newSessionId);
-    setMessages([]);
-    setIsEscalated(false);
-    setAssignedAgent(null);
-    console.log("Cleared chat session, created new:", newSessionId);
-  };
-
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputMessage, setInputMessage] = useState("");
   const [sendingMessage, setSendingMessage] = useState(false);
-  const [sessionId, setSessionId] = useState(() =>
-    getOrCreateSessionId(chatbotId)
-  );
+  const [sessionId] = useState(() => getOrCreateSessionId(chatbotId));
   const [isEscalated, setIsEscalated] = useState(false);
   const [assignedAgent, setAssignedAgent] = useState<any>(null);
   const [isInitialized, setIsInitialized] = useState(false);
