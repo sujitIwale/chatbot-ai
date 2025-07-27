@@ -32,44 +32,6 @@
     </style>
 </head>
 <body>
-    <h1>Chat Widget Integration</h1>
-    <p>Add this script to your website to integrate the chat widget:</p>
-
-    <div class="code" id="basic-example">
-&lt;script 
-  src="http://localhost:3000/embed.js"
-  data-chatbot-id="your-chatbot-id"
-  data-chatbot-name="Support Bot"
-  data-primary-color="#3B82F6"
-&gt;&lt;/script&gt;
-    </div>
-
-    <div class="note">
-        <strong>Required:</strong> Replace <code>your-chatbot-id</code> with your actual chatbot ID.
-    </div>
-
-    <h2>Configuration Options</h2>
-    <ul>
-        <li><code>data-chatbot-id</code> - Your chatbot ID (required)</li>
-        <li><code>data-chatbot-name</code> - Bot display name (default: "AI Assistant")</li>
-        <li><code>data-primary-color</code> - Widget color (default: "#3B82F6")</li>
-        <li><code>data-position</code> - "bottom-right" or "bottom-left" (default: "bottom-right")</li>
-        <li><code>data-initial-message</code> - First bot message</li>
-        <li><code>data-api-base-url</code> - API server URL (default: "http://localhost:3001")</li>
-    </ul>
-
-    <h2>Example</h2>
-    <div class="code" id="advanced-example">
-&lt;script 
-  src="http://localhost:3000/embed.js"
-  data-chatbot-id="demo-bot-123"
-  data-chatbot-name="Help Assistant"
-  data-primary-color="#10B981"
-  data-position="bottom-left"
-  data-initial-message="Hi! How can I help you?"
-&gt;&lt;/script&gt;
-    </div>
-
     <p><strong>Live Demo:</strong> Check the bottom-right corner for the chat widget!</p>
 
     <script>
@@ -78,12 +40,11 @@
         const chatbotId = urlParams.get('chatbotId') || 'demo-chatbot-123';
         const chatbotName = urlParams.get('name') || 'Demo Bot';
         
-        // Update code examples with actual chatbot details if provided
         if (urlParams.get('chatbotId')) {
-            // Update basic example
             const basicExample = document.getElementById('basic-example');
             if (basicExample) {
                 basicExample.innerHTML = `&lt;script 
+  id="chatbot-embed-script"
   src="http://localhost:3000/embed.js"
   data-chatbot-id="${chatbotId}"
   data-chatbot-name="${chatbotName}"
@@ -91,10 +52,10 @@
 &gt;&lt;/script&gt;`;
             }
             
-            // Update advanced example
             const advancedExample = document.getElementById('advanced-example');
             if (advancedExample) {
                 advancedExample.innerHTML = `&lt;script 
+  id="chatbot-embed-script"
   src="http://localhost:3000/embed.js"
   data-chatbot-id="${chatbotId}"
   data-chatbot-name="${chatbotName}"
@@ -105,8 +66,8 @@
             }
         }
         
-        // Create and inject the widget script dynamically
         const script = document.createElement('script');
+        script.id = 'chatbot-embed-script'; // Ensure the ID is set
         script.src = 'http://localhost:3000/embed.js';
         script.setAttribute('data-chatbot-id', chatbotId);
         script.setAttribute('data-chatbot-name', chatbotName);

@@ -1,7 +1,6 @@
 (function() {
   'use strict';
 
-  // Widget configuration
   const DEFAULT_CONFIG = {
     apiBaseUrl: 'http://localhost:3001',
     primaryColor: '#3B82F6',
@@ -90,16 +89,17 @@
           background: white;
           border-radius: 16px;
           box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-          display: none;
+          display: flex;
           flex-direction: column;
           overflow: hidden;
+          visibility: hidden;
           transform: translateY(20px);
           opacity: 0;
           transition: all 0.3s ease;
         }
 
         .chat-widget-window.open {
-          display: flex;
+          visibility: visible;
           transform: translateY(0);
           opacity: 1;
         }
@@ -429,15 +429,16 @@
       }
 
       console.log('ChatWidget: Adding click listener to button');
-      button.addEventListener('click', () => {
-        console.log('ChatWidget: Button clicked');
+      button.addEventListener('click', (e) => {
+        console.log('ChatWidget: Button clicked - event triggered');
+        e.preventDefault();
+        e.stopPropagation();
         this.toggleWidget();
       });
       
       closeBtn.addEventListener('click', () => this.closeWidget());
       form.addEventListener('submit', (e) => this.handleSubmit(e));
       
-      // Close widget when clicking outside
       document.addEventListener('click', (e) => {
         if (!e.target.closest('.chat-widget-container') && this.isOpen) {
           this.closeWidget();
@@ -453,6 +454,7 @@
       const window = document.getElementById('chat-widget-window');
       const button = document.getElementById('chat-widget-button');
       
+      
       if (!window || !button) {
         console.error('ChatWidget: Could not find widget elements');
         return;
@@ -463,11 +465,16 @@
         window.classList.add('open');
         button.classList.add('open');
         button.innerHTML = '×';
+        console.log('ChatWidget: Added open class to window and button');
         setTimeout(() => {
           const input = document.getElementById('chat-widget-input');
-          if (input) input.focus();
+          if (input) {
+            console.log('ChatWidget: Focusing input');
+            input.focus();
+          }
         }, 100);
       } else {
+        console.log('ChatWidget: Closing widget');
         this.closeWidget();
       }
     }
@@ -699,7 +706,6 @@
       const header = document.querySelector('.chat-widget-header');
       
       if (assignedAgent) {
-        // Update header color for escalation
         header.style.background = 'linear-gradient(to right, #059669, #10B981)';
         
         headerInfo.innerHTML = `
@@ -742,15 +748,22 @@
 
   // Global function to initialize the widget
   window.initChatWidget = function(config) {
-    console.log('ChatWidget: Initializing with config:', config);
+    console.log('ChatWidget: initChatWidget called');
+    console.log('ChatWidget: Config received:', config);
     
     if (!config.chatbotId) {
       console.error('ChatWidget: chatbotId is required');
       return;
     }
     
+    // Check if widget already exists
+    const existingWidget = document.querySelector('.chat-widget-container');
+    if (existingWidget) {
+      console.log('ChatWidget: Widget already exists, removing old one');
+      existingWidget.remove();
+    }
+    
     try {
-      // Ensure DOM is ready
       if (document.readyState === 'loading') {
         console.log('ChatWidget: DOM not ready, waiting for DOMContentLoaded');
         document.addEventListener('DOMContentLoaded', () => {

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Button } from "../ui/button";
-import { Code, Copy, Eye, Check, Globe, Hash } from "lucide-react";
+import { Code, Copy, Eye, Check, Hash } from "lucide-react";
+import { API_URL } from "@/constants/api";
 
 interface EmbedPanelProps {
   chatbotId: string;
@@ -12,10 +13,11 @@ const EmbedPanel: React.FC<EmbedPanelProps> = ({ chatbotId, chatbotName }) => {
   const [copiedId, setCopiedId] = useState(false);
 
   const baseUrl = window.location.origin;
-  const apiBaseUrl = "http://localhost:3001"; // You can make this configurable later
+  const apiBaseUrl = API_URL;
 
   const embedCode = `<!-- ${chatbotName} Chat Widget -->
 <script 
+  id="chatbot-embed-script"
   src="${baseUrl}/embed.js"
   data-chatbot-id="${chatbotId}"
   data-api-base-url="${apiBaseUrl}"
@@ -89,39 +91,6 @@ const EmbedPanel: React.FC<EmbedPanelProps> = ({ chatbotId, chatbotName }) => {
                   </>
                 )}
               </Button>
-            </div>
-          </div>
-        </div>
-
-        {/* Website Integration Card */}
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-          <div className="flex items-center space-x-3 mb-4">
-            <div className="p-2 bg-blue-100 rounded-lg">
-              <Globe className="w-5 h-5 text-blue-600" />
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900">
-                Chat Widget
-              </h3>
-              <p className="text-sm text-gray-600">
-                Floating chat button appears at bottom-right corner (380px ×
-                500px)
-              </p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-            <div className="bg-gray-50 p-3 rounded-lg">
-              <div className="text-sm font-medium text-gray-900">Position</div>
-              <div className="text-sm text-gray-600">Bottom Right</div>
-            </div>
-            <div className="bg-gray-50 p-3 rounded-lg">
-              <div className="text-sm font-medium text-gray-900">Size</div>
-              <div className="text-sm text-gray-600">380px × 500px</div>
-            </div>
-            <div className="bg-gray-50 p-3 rounded-lg">
-              <div className="text-sm font-medium text-gray-900">Style</div>
-              <div className="text-sm text-gray-600">Matches React Design</div>
             </div>
           </div>
         </div>
