@@ -138,7 +138,12 @@ const EmbedPanel: React.FC<EmbedPanelProps> = ({ chatbotId, chatbotName }) => {
                   variant="outline"
                   size="sm"
                   onClick={() =>
-                    window.open(`${baseUrl}/widget-demo.html`, "_blank")
+                    window.open(
+                      `${baseUrl}/widget-demo.html?chatbotId=${chatbotId}&name=${encodeURIComponent(
+                        chatbotName
+                      )}`,
+                      "_blank"
+                    )
                   }
                 >
                   <Eye className="w-4 h-4 mr-2" />

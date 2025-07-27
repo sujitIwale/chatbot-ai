@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Widget Demo</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .code {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            font-family: monospace;
+            overflow-x: auto;
+        }
+        
+        .note {
+            background: #e7f3ff;
+            padding: 10px;
+            border-radius: 5px;
+            border-left: 4px solid #0066cc;
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Chat Widget Integration</h1>
+    <p>Add this script to your website to integrate the chat widget:</p>
+
+    <div class="code" id="basic-example">
+&lt;script 
+  src="http://localhost:3000/embed.js"
+  data-chatbot-id="your-chatbot-id"
+  data-chatbot-name="Support Bot"
+  data-primary-color="#3B82F6"
+&gt;&lt;/script&gt;
+    </div>
+
+    <div class="note">
+        <strong>Required:</strong> Replace <code>your-chatbot-id</code> with your actual chatbot ID.
+    </div>
+
+    <h2>Configuration Options</h2>
+    <ul>
+        <li><code>data-chatbot-id</code> - Your chatbot ID (required)</li>
+        <li><code>data-chatbot-name</code> - Bot display name (default: "AI Assistant")</li>
+        <li><code>data-primary-color</code> - Widget color (default: "#3B82F6")</li>
+        <li><code>data-position</code> - "bottom-right" or "bottom-left" (default: "bottom-right")</li>
+        <li><code>data-initial-message</code> - First bot message</li>
+        <li><code>data-api-base-url</code> - API server URL (default: "http://localhost:3001")</li>
+    </ul>
+
+    <h2>Example</h2>
+    <div class="code" id="advanced-example">
+&lt;script 
+  src="http://localhost:3000/embed.js"
+  data-chatbot-id="demo-bot-123"
+  data-chatbot-name="Help Assistant"
+  data-primary-color="#10B981"
+  data-position="bottom-left"
+  data-initial-message="Hi! How can I help you?"
+&gt;&lt;/script&gt;
+    </div>
+
+    <p><strong>Live Demo:</strong> Check the bottom-right corner for the chat widget!</p>
+
+    <script>
+        // Get URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const chatbotId = urlParams.get('chatbotId') || 'demo-chatbot-123';
+        const chatbotName = urlParams.get('name') || 'Demo Bot';
+        
+        // Update code examples with actual chatbot details if provided
+        if (urlParams.get('chatbotId')) {
+            // Update basic example
+            const basicExample = document.getElementById('basic-example');
+            if (basicExample) {
+                basicExample.innerHTML = `&lt;script 
+  src="http://localhost:3000/embed.js"
+  data-chatbot-id="${chatbotId}"
+  data-chatbot-name="${chatbotName}"
+  data-primary-color="#3B82F6"
+&gt;&lt;/script&gt;`;
+            }
+            
+            // Update advanced example
+            const advancedExample = document.getElementById('advanced-example');
+            if (advancedExample) {
+                advancedExample.innerHTML = `&lt;script 
+  src="http://localhost:3000/embed.js"
+  data-chatbot-id="${chatbotId}"
+  data-chatbot-name="${chatbotName}"
+  data-primary-color="#10B981"
+  data-position="bottom-left"
+  data-initial-message="Hi! How can I help you?"
+&gt;&lt;/script&gt;`;
+            }
+        }
+        
+        // Create and inject the widget script dynamically
+        const script = document.createElement('script');
+        script.src = 'http://localhost:3000/embed.js';
+        script.setAttribute('data-chatbot-id', chatbotId);
+        script.setAttribute('data-chatbot-name', chatbotName);
+        script.setAttribute('data-primary-color', '#8B5CF6');
+        script.setAttribute('data-initial-message', `👋 Hi! I'm ${chatbotName}.`);
+        
+        document.body.appendChild(script);
+    </script>
+</body>
+</html> 

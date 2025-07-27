@@ -488,7 +488,7 @@
 
     async loadChatHistory() {
       try {
-        const response = await fetch(`${this.config.apiBaseUrl}/api/chatbot/chat/session/${this.sessionId}/history`);
+        const response = await fetch(`${this.config.apiBaseUrl}/api/chat/session/${this.sessionId}/history`);
         const messages = await response.json();
         
         this.hideLoading();
