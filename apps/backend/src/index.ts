@@ -1,6 +1,5 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
-import helmet from 'helmet';
 import morgan from 'morgan';
 import session from 'express-session';
 import dotenv from 'dotenv';
@@ -10,6 +9,7 @@ import userRouter from './routes/user';
 import { authenticateJWT } from './middleware/auth';
 import chatbotRouter from './routes/chatbot';
 import agentToolRouter from './routes/agent-tool';
+import chatRouter from './routes/chat';
 
 dotenv.config();
 
@@ -18,10 +18,6 @@ const PORT = process.env.PORT || 3001;
 
 // Middleware
 // app.use(helmet());
-app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
-  credentials: true
-}));
 app.use(morgan('combined'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -41,11 +37,32 @@ app.get('/', (req: Request, res: Response) => {
   res.json("welcome");
 });
 
-// Routes
-app.use('/auth', authRouter);
-app.use('/api/user', authenticateJWT, userRouter);
-app.use('/api/chatbot', authenticateJWT, chatbotRouter);
-app.use('/api/agent-tool', agentToolRouter);
+// PUBLIC ROUTES FIRST - Chat widget (allow all domains)
+app.use('/api/chat', cors({
+  origin: true, // Allow all origins for chat widget
+  credentials: true
+}), chatRouter);
+
+// PROTECTED ROUTES - Apply restricted CORS
+app.use('/auth', cors({
+  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  credentials: true
+}), authRouter);
+
+app.use('/api/user', cors({
+  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  credentials: true
+}), authenticateJWT, userRouter);
+
+app.use('/api/chatbot', cors({
+  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  credentials: true
+}), authenticateJWT, chatbotRouter);
+
+app.use('/api/agent-tool', cors({
+  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  credentials: true
+}), agentToolRouter);
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);

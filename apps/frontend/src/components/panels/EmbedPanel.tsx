@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Button } from "../ui/button";
-import { Code, Copy, Eye, Check, Globe } from "lucide-react";
+import { Code, Copy, Eye, Check, Globe, Hash } from "lucide-react";
 
 interface EmbedPanelProps {
   chatbotId: string;
@@ -9,32 +9,30 @@ interface EmbedPanelProps {
 
 const EmbedPanel: React.FC<EmbedPanelProps> = ({ chatbotId, chatbotName }) => {
   const [copiedCode, setCopiedCode] = useState(false);
+  const [copiedId, setCopiedId] = useState(false);
 
   const baseUrl = window.location.origin;
-  const embedUrl = `${baseUrl}/chat/${chatbotId}`;
+  const apiBaseUrl = "http://localhost:3001"; // You can make this configurable later
 
-  const embedCode = `<!-- ${chatbotName} Chatbot Embed Code -->
-<script>
-  (function() {
-    var chatbot = document.createElement('div');
-    chatbot.id = 'chatbot-${chatbotId}';
-    chatbot.style.cssText = 'position:fixed;bottom:20px;right:20px;z-index:9999;';
-    document.body.appendChild(chatbot);
-    
-    var iframe = document.createElement('iframe');
-    iframe.src = '${embedUrl}?embed=true&theme=light&color=%233B82F6';
-    iframe.width = '400';
-    iframe.height = '600';
-    iframe.frameBorder = '0';
-    iframe.style.cssText = 'border-radius:12px;box-shadow:0 10px 25px rgba(0,0,0,0.15);';
-    chatbot.appendChild(iframe);
-  })();
-</script>`;
+  const embedCode = `<!-- ${chatbotName} Chat Widget -->
+<script 
+  src="${baseUrl}/embed.js"
+  data-chatbot-id="${chatbotId}"
+  data-api-base-url="${apiBaseUrl}"
+  data-chatbot-name="${chatbotName}"
+  data-primary-color="#3B82F6"
+  data-initial-message="Hello! How can I help you today?"
+></script>`;
 
-  const copyToClipboard = (text: string) => {
+  const copyToClipboard = (text: string, type: "code" | "id") => {
     navigator.clipboard.writeText(text);
-    setCopiedCode(true);
-    setTimeout(() => setCopiedCode(false), 2000);
+    if (type === "code") {
+      setCopiedCode(true);
+      setTimeout(() => setCopiedCode(false), 2000);
+    } else {
+      setCopiedId(true);
+      setTimeout(() => setCopiedId(false), 2000);
+    }
   };
 
   return (
@@ -49,9 +47,50 @@ const EmbedPanel: React.FC<EmbedPanelProps> = ({ chatbotId, chatbotName }) => {
             Website Embed
           </h1>
           <p className="text-gray-600 max-w-2xl mx-auto">
-            Add {chatbotName} to your website with a simple script tag. Copy the
-            code below and paste it into your website.
+            Add {chatbotName} to your website with a simple script tag. The chat
+            widget will appear at the bottom-right corner.
           </p>
+        </div>
+
+        {/* Chatbot ID Card */}
+        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="p-2 bg-gray-100 rounded-lg">
+                <Hash className="w-5 h-5 text-gray-600" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Chatbot ID
+                </h3>
+                <p className="text-sm text-gray-600">
+                  Use this ID to integrate your chatbot
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center space-x-3">
+              <code className="bg-gray-100 px-3 py-2 rounded-lg text-sm font-mono text-gray-800">
+                {chatbotId}
+              </code>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => copyToClipboard(chatbotId, "id")}
+              >
+                {copiedId ? (
+                  <>
+                    <Check className="w-4 h-4 mr-2 text-green-600" />
+                    Copied!
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-4 h-4 mr-2" />
+                    Copy ID
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
         </div>
 
         {/* Website Integration Card */}
@@ -62,11 +101,27 @@ const EmbedPanel: React.FC<EmbedPanelProps> = ({ chatbotId, chatbotName }) => {
             </div>
             <div>
               <h3 className="text-lg font-semibold text-gray-900">
-                Website Widget
+                Chat Widget
               </h3>
               <p className="text-sm text-gray-600">
-                Add a floating chat widget to your website
+                Floating chat button appears at bottom-right corner (380px ×
+                500px)
               </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+            <div className="bg-gray-50 p-3 rounded-lg">
+              <div className="text-sm font-medium text-gray-900">Position</div>
+              <div className="text-sm text-gray-600">Bottom Right</div>
+            </div>
+            <div className="bg-gray-50 p-3 rounded-lg">
+              <div className="text-sm font-medium text-gray-900">Size</div>
+              <div className="text-sm text-gray-600">380px × 500px</div>
+            </div>
+            <div className="bg-gray-50 p-3 rounded-lg">
+              <div className="text-sm font-medium text-gray-900">Style</div>
+              <div className="text-sm text-gray-600">Matches React Design</div>
             </div>
           </div>
         </div>
@@ -82,7 +137,9 @@ const EmbedPanel: React.FC<EmbedPanelProps> = ({ chatbotId, chatbotName }) => {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => window.open(embedUrl, "_blank")}
+                  onClick={() =>
+                    window.open(`${baseUrl}/widget-demo.html`, "_blank")
+                  }
                 >
                   <Eye className="w-4 h-4 mr-2" />
                   Preview
@@ -90,7 +147,7 @@ const EmbedPanel: React.FC<EmbedPanelProps> = ({ chatbotId, chatbotName }) => {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => copyToClipboard(embedCode)}
+                  onClick={() => copyToClipboard(embedCode, "code")}
                 >
                   {copiedCode ? (
                     <>
@@ -124,11 +181,35 @@ const EmbedPanel: React.FC<EmbedPanelProps> = ({ chatbotId, chatbotName }) => {
                   website
                 </li>
                 <li>
-                  3. Your chatbot will appear as a floating widget on your
-                  website
+                  3. A floating chat button will appear at the bottom-right
+                  corner
                 </li>
-                <li>4. Visitors can click the widget to start chatting</li>
+                <li>
+                  4. Visitors can click the button to open the chat widget
+                  (380px × 500px)
+                </li>
+                <li>
+                  5. Conversations are automatically saved in localStorage
+                </li>
               </ol>
+            </div>
+
+            <div className="mt-4 p-4 bg-green-50 rounded-lg">
+              <h4 className="font-medium text-green-900 mb-2">
+                Customization Options:
+              </h4>
+              <ul className="text-sm text-green-800 space-y-1">
+                <li>
+                  • <code>data-chatbot-name</code>: Display name for your bot
+                </li>
+                <li>
+                  • <code>data-primary-color</code>: Theme color (hex code)
+                </li>
+                <li>
+                  • <code>data-initial-message</code>: Welcome message
+                </li>
+                <li>• Works on any domain without CORS issues</li>
+              </ul>
             </div>
           </div>
         </div>
