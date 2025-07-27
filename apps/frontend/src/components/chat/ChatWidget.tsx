@@ -94,24 +94,27 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({
     setMessages((prev) => [...prev, tempUserMessage]);
 
     try {
-      const response = await chatbotApi.sendMessage(chatbotId, {
+      const result = await chatbotApi.sendMessage(chatbotId, {
         message: userMessageContent,
         sessionId,
         userId: "anonymous",
       });
 
-      setMessages((prev) =>
-        prev.filter((msg) => msg.id !== tempUserMessage.id)
-      );
+      setMessages((prev) => {
+        const filteredMessages = prev.filter(
+          (msg) => msg.id !== tempUserMessage.id
+        );
 
-      const agentMessage: ChatMessage = {
-        id: `agent_${Date.now()}`,
-        content: response.response,
-        sender: "AGENT",
-        createdAt: new Date().toISOString(),
-      };
+        const actualUserMessage: ChatMessage = {
+          id: `user_${Date.now()}`,
+          content: userMessageContent,
+          sender: "USER",
+          createdAt: new Date().toISOString(),
+        };
 
-      setMessages((prev) => [...prev, tempUserMessage, agentMessage]);
+        const agentMessages = result.response || [];
+        return [...filteredMessages, actualUserMessage, ...agentMessages];
+      });
     } catch (error) {
       console.error("Error sending message:", error);
       setMessages((prev) =>

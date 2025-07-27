@@ -10,6 +10,7 @@ export const getChatbots = async (req: Request, res: Response) => {
 
     res.status(200).json(chatbots);
   } catch (error) {
+    console.log('Error getting chatbots', error);
     res.status(500).json({ error: "Failed to get chatbots" });
   }
 };

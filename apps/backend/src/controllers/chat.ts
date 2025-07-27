@@ -35,10 +35,6 @@ export const sendMessage = async (req: Request, res: Response) => {
             }
         });
 
-        if (chatSession.handedOff) {
-            return handleHumanSupportMessage(chatSession, message, res);
-        }
-
         const chatbot = chatSession.chatbot;
         if(!chatbot.lyzrAgentId){
             return res.status(400).json({ error: "Agent not initialized" });
@@ -53,7 +49,7 @@ export const sendMessage = async (req: Request, res: Response) => {
             }
         );
 
-        await prisma.message.create({
+        const agentMessage = await prisma.message.create({
             data: {
                 sessionId,
                 content: agentResponse.responseMessage,
@@ -64,16 +60,18 @@ export const sendMessage = async (req: Request, res: Response) => {
         // Check if agent couldn't handle the query
         if (!agentResponse.can_handle) {
             const newMessage = await handleEscalationToHuman(chatSession, message);
+
+            console.log('Escalated to human', newMessage);
             
             return res.status(200).json({
-                response: agentResponse.responseMessage,
+                response: [agentMessage, newMessage],
                 escalated: true,
                 message: newMessage?.content || "Your query has been escalated to our human support team. A support agent will assist you shortly."
             });
         }
 
         res.status(200).json({
-            response: agentResponse.responseMessage,
+            response: [agentMessage],
             escalated: false
         });
     } catch (error) {
@@ -134,36 +132,5 @@ async function handleEscalationToHuman(chatSession: any, originalMessage: string
     } catch (error) {
         console.error('Error handling escalation:', error);
         return null;
-    }
-}
-
-async function handleHumanSupportMessage(chatSession: any, message: string, res: Response) {
-    const activeTicket = await prisma.ticket.findFirst({
-        where: {
-            sessionId: chatSession.id
-        },
-        include: {
-            assignedUser: {
-                select: {
-                    id: true,
-                    name: true,
-                    email: true
-                }
-            }
-        }
-    });
-
-    if (activeTicket && activeTicket.assignedUser) {
-        return res.status(200).json({
-            response: `Your message has been received. You are currently connected to ${activeTicket.assignedUser.name}. They will respond to you shortly.`,
-            escalated: true,
-            assignedTo: activeTicket.assignedUser,
-            ticketId: activeTicket.id
-        });
-    } else {
-        return res.status(200).json({
-            response: "Your query is being handled by our support team. Please wait for a response.",
-            escalated: true
-        });
     }
 }

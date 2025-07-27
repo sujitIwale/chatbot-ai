@@ -40,34 +40,8 @@
         const chatbotId = urlParams.get('chatbotId') || 'demo-chatbot-123';
         const chatbotName = urlParams.get('name') || 'Demo Bot';
         
-        if (urlParams.get('chatbotId')) {
-            const basicExample = document.getElementById('basic-example');
-            if (basicExample) {
-                basicExample.innerHTML = `&lt;script 
-  id="chatbot-embed-script"
-  src="http://localhost:3000/embed.js"
-  data-chatbot-id="${chatbotId}"
-  data-chatbot-name="${chatbotName}"
-  data-primary-color="#3B82F6"
-&gt;&lt;/script&gt;`;
-            }
-            
-            const advancedExample = document.getElementById('advanced-example');
-            if (advancedExample) {
-                advancedExample.innerHTML = `&lt;script 
-  id="chatbot-embed-script"
-  src="http://localhost:3000/embed.js"
-  data-chatbot-id="${chatbotId}"
-  data-chatbot-name="${chatbotName}"
-  data-primary-color="#10B981"
-  data-position="bottom-left"
-  data-initial-message="Hi! How can I help you?"
-&gt;&lt;/script&gt;`;
-            }
-        }
-        
         const script = document.createElement('script');
-        script.id = 'chatbot-embed-script'; // Ensure the ID is set
+        script.id = 'chatbot-embed-script';
         script.src = 'http://localhost:3000/embed.js';
         script.setAttribute('data-chatbot-id', chatbotId);
         script.setAttribute('data-chatbot-name', chatbotName);

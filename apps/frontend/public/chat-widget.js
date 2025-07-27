@@ -571,25 +571,15 @@
         
         this.hideTyping();
         
-        // Add agent response
-        this.addMessage({
-          content: data.response,
-          sender: 'AGENT',
-          createdAt: new Date().toISOString()
+        const agentMessages = data.response || [];
+        agentMessages.forEach(message => {
+          this.addMessage({
+            id: message.id,
+            content: message.content,
+            sender: message.sender,
+            createdAt: message.createdAt
+          });
         });
-        
-        // Handle escalation
-        if (data.escalated) {
-          this.updateHeaderForEscalation(data.assignedTo);
-          
-          if (data.message) {
-            this.addMessage({
-              content: data.message,
-              sender: 'AGENT',
-              createdAt: new Date().toISOString()
-            });
-          }
-        }
         
       } catch (error) {
         console.error('Error sending message:', error);
@@ -701,27 +691,7 @@
       }
     }
 
-    updateHeaderForEscalation(assignedAgent) {
-      const headerInfo = document.querySelector('.chat-widget-header-info');
-      const header = document.querySelector('.chat-widget-header');
-      
-      if (assignedAgent) {
-        header.style.background = 'linear-gradient(to right, #059669, #10B981)';
-        
-        headerInfo.innerHTML = `
-          <div class="chat-widget-avatar">
-            ${assignedAgent.name.charAt(0)}
-          </div>
-          <div>
-            <h2 class="chat-widget-header-title">${assignedAgent.name}</h2>
-            <div class="chat-widget-status">
-              <div class="chat-widget-status-dot"></div>
-              Connected to Support • Live Chat
-            </div>
-          </div>
-        `;
-      }
-    }
+
 
     showError(message) {
       const errorEl = document.getElementById('chat-widget-error');
