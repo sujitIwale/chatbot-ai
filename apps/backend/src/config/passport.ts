@@ -32,7 +32,7 @@ passport.use(
       try {
         // Check if user already exists
         const existingUser = await prisma.user.findUnique({
-          where: { googleId: profile.id },
+          where: { email: profile.emails?.[0].value || '' },
         });
 
         if (existingUser) {

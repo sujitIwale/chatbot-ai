@@ -1,11 +1,7 @@
 import { useEffect } from "react";
 import { useState } from "react";
 import AuthContext from "./AuthContext";
-import {
-  getToken,
-  handleGoogleAuthCallback,
-  tryLogout,
-} from "../../utils/auth";
+import { getToken, handleAfterAuth, tryLogout } from "../../utils/auth";
 import { userApi } from "../../api/user";
 import { authApi } from "../../api/auth";
 
@@ -41,7 +37,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     if (token) {
       console.log("setting token auth provider", token);
-      handleGoogleAuthCallback(token);
+      handleAfterAuth(token);
     }
 
     fetchUser();

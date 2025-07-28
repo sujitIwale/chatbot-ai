@@ -1,8 +1,12 @@
 import { Router } from 'express';
 import passport from 'passport';
 import jwt from 'jsonwebtoken';
+import { login, signup } from '../controllers/auth';
 
 const authRouter: Router = Router();
+
+authRouter.post('/signup', signup);
+authRouter.post('/login', login);
 
 // Google OAuth routes
 authRouter.get(

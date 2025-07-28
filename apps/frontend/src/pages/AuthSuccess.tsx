@@ -1,20 +1,19 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { handleGoogleAuthCallback } from "../lib/utils/auth";
+import { handleAfterAuth } from "@/lib/utils/auth";
 
 const AuthSuccess: React.FC = () => {
   const [searchParams] = useSearchParams();
+  const token = searchParams.get("token");
   const navigate = useNavigate();
   const [status, setStatus] = useState<"loading" | "success" | "error">(
     "loading"
   );
 
   useEffect(() => {
-    const token = searchParams.get("token");
-
     if (token) {
       try {
-        handleGoogleAuthCallback(token);
+        handleAfterAuth(token);
         setStatus("success");
 
         setTimeout(() => {
@@ -27,7 +26,7 @@ const AuthSuccess: React.FC = () => {
     } else {
       setStatus("error");
     }
-  }, [searchParams, navigate]);
+  }, [token, navigate]);
 
   if (status === "loading") {
     return (
