@@ -4,6 +4,9 @@ AI-powered customer support chatbot platform. Create intelligent support agents 
 
 **Live Demo**: [https://lyzr-chatbot.netlify.app/](https://lyzr-chatbot.netlify.app/)
 
+## Note
+The backend is deployed on Render Cloud, and due to inactivity, the instance may shut down. It may take around 50 seconds to start again. If you notice any API delays, please wait or refresh
+
 ## Features
 
 - Create AI chatbots powered by Lyzr agent in under 5 minutes
