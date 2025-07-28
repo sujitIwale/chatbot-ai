@@ -1,8 +1,4 @@
 import { lyzrClient, ragClient } from "./axios";
-import FormData from "form-data";
-import * as fs from "fs";
-import * as path from "path";
-import * as os from "os";
 import { agentInstructions, escalationPhrase } from "../constants/agent";
 import { Chatbot } from "@prisma/client";
 
@@ -51,6 +47,7 @@ interface RAGConfig {
   vector_db_credential_id: string;
   description: string;
   collection_name: string;
+  name: string;
   llm_model: string;
   embedding_model: string;
   vector_store_provider: string;
@@ -96,12 +93,13 @@ const lyzrApis = {
   createRAGConfiguration: async (chatbot: Chatbot): Promise<RAGResponse> => {
     try {
       const config: RAGConfig = {
-        user_id: `user_${chatbot.id}`,
+        user_id: "sk-default-0fA1JkEWC1EaiJKVsYX191Ftl0mpHinL",
         llm_credential_id: "lyzr_openai",
         embedding_credential_id: "lyzr_openai",
         vector_db_credential_id: "lyzr_qdrant",
         description: `Knowledge base for ${chatbot.name} chatbot`,
-        collection_name: `kb_${chatbot.id}}`,
+        collection_name: `kb_support_agent`,
+        name: 'kb_support_agent',
         llm_model: "gpt-4o-mini",
         embedding_model: "text-embedding-3-small",
         vector_store_provider: "qdrant",
@@ -112,6 +110,7 @@ const lyzrApis = {
         },
       };
       const response = await ragClient.post("/v3/rag/", config);
+      console.log('rag created created', response.data);
       return response.data;
     } catch (error) {
       console.error("Error creating RAG configuration:", error);
@@ -121,61 +120,30 @@ const lyzrApis = {
   uploadTextTraining: async (
     chatbot: Chatbot,
     ragId: string
-  ): Promise<TextTrainingResponse> => {
-    let tempFilePath: string | null = null;
-
+  ) => {
     try {
-      let fileName = `temp_${Date.now()}_context.txt`;
-      const tempDir = os.tmpdir();
-      tempFilePath = path.join(tempDir, fileName);
-
-      fs.writeFileSync(tempFilePath, chatbot.context, "utf-8");
-
-      const formData = new FormData();
-
-      formData.append("data_parser", "txt_parser");
-      formData.append("extra_info", "{}");
-
-      formData.append("file", fs.createReadStream(tempFilePath), {
-        filename: fileName,
-        contentType: "text/plain",
-      });
-
-      console.log(
-        `Uploading file: ${tempFilePath} for RAG ID: ${ragId}`
-      );
-
-
-      const response = await ragClient.post(
-        `/v3/train/txt/?rag_id=${ragId}`,
-        formData,
+      const parseResponse = await ragClient.post("/v3/parse/text/", [
         {
-          headers: {
-            Accept: "application/json, text/plain, */*",
-          },
+          text: chatbot.context,
+          source: chatbot.context.substring(0, 50)
         }
+      ]);
+
+      console.log('Text parsing response:', parseResponse.data);
+
+      const trainResponse = await ragClient.post(
+        `/v3/rag/train/${ragId}/`,
+        parseResponse.data.documents
       );
 
-      return response.data;
+      console.log('RAG training response:', trainResponse.data);
     } catch (error: any) {
-      console.error("Error uploading text training:", error);
+      console.error("Error in text training:", error);
       throw new Error(
-        `Failed to upload text training data: ${
+        `Failed to train RAG model: ${
           error.message || "Unknown error"
         }`
       );
-    } finally {
-      if (tempFilePath && fs.existsSync(tempFilePath)) {
-        try {
-          fs.unlinkSync(tempFilePath);
-          console.log(`Cleaned up temporary file: ${tempFilePath}`);
-        } catch (cleanupError) {
-          console.warn(
-            `Failed to cleanup temporary file: ${tempFilePath}`,
-            cleanupError
-          );
-        }
-      }
     }
   },
 };
@@ -243,7 +211,7 @@ const customerSupportAgent = {
                     lyzr_rag: {
                       base_url: "https://rag-prod.studio.lyzr.ai",
                       rag_id: ragId,
-                      rag_name: `kb_${chatbot.id}`,
+                      rag_name: `kb_support_agent`,
                       params: {
                         top_k: 5,
                         retrieval_type: "basic",
