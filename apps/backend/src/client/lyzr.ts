@@ -98,8 +98,8 @@ const lyzrApis = {
         embedding_credential_id: "lyzr_openai",
         vector_db_credential_id: "lyzr_qdrant",
         description: `Knowledge base for ${chatbot.name} chatbot`,
-        collection_name: `kb_support_agent`,
-        name: 'kb_support_agent',
+        collection_name: `kb_${chatbot.id.replace(/-/g, '_')}`,
+        name: `kb_${chatbot.id.replace(/-/g, '_')}`,
         llm_model: "gpt-4o-mini",
         embedding_model: "text-embedding-3-small",
         vector_store_provider: "qdrant",
@@ -211,7 +211,7 @@ const customerSupportAgent = {
                     lyzr_rag: {
                       base_url: "https://rag-prod.studio.lyzr.ai",
                       rag_id: ragId,
-                      rag_name: `kb_support_agent`,
+                      rag_name: `kb_${chatbot.id.replace(/-/g, '_')}`,
                       params: {
                         top_k: 5,
                         retrieval_type: "basic",
